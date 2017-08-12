@@ -1,0 +1,110 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="156dp" android:id="@+id/map" tools:context=".MainMapsActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_weight="1.29" />
+
+    <LinearLayout
+        android:id="@+id/layoutHorizontal"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:visibility="invisible">
+
+        <AutoCompleteTextView
+            android:text=""
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/autoComplFrom"
+            android:layout_weight="1"
+            android:contentDescription="From"
+            android:visibility="invisible"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:ems="10"
+            android:id="@+id/editOrderDetails"
+            android:layout_weight="1"
+            android:visibility="invisible"/>
+
+        <AutoCompleteTextView
+            android:text=""
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/autoComplTo"
+            android:layout_weight="1"
+            android:visibility="invisible"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btnManualMove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickBtnManualMove"
+            android:text="Эмуляция движения"
+            android:checked="false"
+            android:layout_centerInParent="true"
+            android:visibility="visible">
+        </Button>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btnHelp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickBtnHelp"
+            android:text="SOS"
+            android:checked="false"
+            android:layout_centerInParent="true"
+            android:visibility="visible">
+        </Button>
+
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/layoutHorizontalButtons"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+        <Button
+            android:id="@+id/btnSuccess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickBtnSuccess"
+            android:text="Готово"
+            android:checked="false"
+            android:visibility="invisible">
+        </Button>
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickBtnSuccess"
+            android:text="Отменить"
+            android:checked="false"
+            android:visibility="invisible">
+        </Button>
+    </LinearLayout>
+
+</LinearLayout>
