@@ -17,6 +17,9 @@ public class Courier {
     private String name;
     private int idWorkPlace;
 
+    private String login;
+    private String password;
+
     //for server test
     private double geo_lat;
     private double geo_lon;
@@ -52,19 +55,26 @@ public class Courier {
         this.orders = new ArrayList<>();
     }
 
+    public Courier(String login, String password) {
+        this.login = login;
+        this.password = password;
+    }
+
 
     public void requestDataFromServer(MainMapsActivity mainMapsActivity) {
-        NetworkDAO networkDAO = new NetworkDAO();
-        try {
-            //timeNotification = new TimeNotification(this, null);
-            //timeNotification.setOnetimeTimer(this.getApplicationContext());
+        if (isReadyToRequest()) {
+            NetworkDAO networkDAO = new NetworkDAO();
+            try {
+                //timeNotification = new TimeNotification(this, null);
+                //timeNotification.setOnetimeTimer(this.getApplicationContext());
 
-            //onetimeTimer();
-            networkDAO.execute(mainMapsActivity);
-            //isRouteNeed = false;
-            //getRequest = networkDAO.request(url);
-        } catch (Exception e) {
-            e.printStackTrace();
+                //onetimeTimer();
+                networkDAO.execute(mainMapsActivity);
+                //isRouteNeed = false;
+                //getRequest = networkDAO.request(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -81,6 +91,10 @@ public class Courier {
     public String getDistanceToChangedLocation(Coordinate changedLocation) {
         return currentCoordinate != null && changedLocation != null ?
                 "ChangedDistance: " + currentCoordinate.distanceTo(changedLocation.getLat(), changedLocation.getLng()) : "null";
+    }
+
+    public boolean isReadyToRequest() {
+        return this != null && this.getId() != 0;
     }
 
     public void sendDataToServer() {
@@ -191,7 +205,7 @@ public class Courier {
                         order.getDouble("lngWorkPlace")
                 ));
             }
-            if(this.orders != null && this.orders.get(0) != null) {
+            if(this.orders != null && !this.orders.isEmpty() && this.orders.get(0) != null) {
                 this.destinationCoordinate = new Coordinate(this.orders.get(this.orders.size() - 1).getAddressCoordinate().getLat(),
                         this.orders.get(this.orders.size() - 1).getAddressCoordinate().getLng());
             }
@@ -259,4 +273,19 @@ public class Courier {
         if(this.orders != null) this.orders.clear();
     }
 
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

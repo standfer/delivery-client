@@ -112,6 +112,9 @@ public class RequestHelper {
                 //add waypoint for address order
                 urlBuilder += String.format("%s,%s", order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
             }
+            if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
+                destination = new Coordinate(origin.getLat(), origin.getLng());
+            }
             urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
                     "&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
             URL url = new URL(urlBuilder);

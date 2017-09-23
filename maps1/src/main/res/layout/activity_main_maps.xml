@@ -80,6 +80,23 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickBtnLogout"
+            android:text="Сменить пользователя"
+            android:checked="false"
+            android:layout_centerInParent="true"
+            android:visibility="visible">
+        </Button>
+
+
+    </RelativeLayout>
+
 
     <LinearLayout
         android:id="@+id/layoutHorizontalButtons"

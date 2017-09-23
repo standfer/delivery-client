@@ -1,16 +1,13 @@
 package com.example.hello.maps1;
 
 import android.Manifest;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -19,9 +16,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.example.hello.maps1.helpers.StandardIntentsHelper;
+import com.example.hello.maps1.constants.Constants;
+import com.example.hello.maps1.helpers.ActivityHelper;
+import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -32,7 +30,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 
 public class MainMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -48,17 +45,20 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
     private List<Coordinate> routePoints;
     double distanceChanged = 0;
     private Courier courier;
+    private int idCourier = 10;
     private double coordinateCounter = 0.001;
 
     //private String serverAddress = "http://185.26.113.131/ilkato/helper.php";//"http://192.168.1.5";// "http://192.168.43.185";//
     //private String serverAddress = "http://192.168.43.185";//
-    private String serverAddress = "http://192.168.1.36/delivery/helpers/helper.php";//
+    //private String serverAddress = "http://192.168.1.36/delivery/helpers/helper.php";//
 
     //GUI
     private Button btnHelp;
     private Button btnManualMove;
+    private Button btnLogout;
     View.OnClickListener btnHelpOnClickListener;
     View.OnClickListener btnManualMoveOnClickListener;
+    View.OnClickListener btnLoginOnClickListener;
     LinearLayout layoutHorizontal;
     private AutoCompleteTextView autoComplFrom, autoComplTo;
 
@@ -75,12 +75,10 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         this.mainMapsActivity = this;
 
-
         isRouteNeed = true;
         setContentView(R.layout.activity_main_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         //timeNotification = new TimeNotification();
 
@@ -90,9 +88,10 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
 
-        courier = new Courier(10, "Vasya", 1);
+        idCourier = getIntent ().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
+        courier = new Courier(idCourier, "Vasya", 1);
 
-        Timer timer = new Timer();
+        /*Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -105,7 +104,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
                     Log.d("Request", ex.getStackTrace().toString());
                 }
             }
-        }, 1000, 15000);
+        }, 1000, 15000);*/
     }
 
 
@@ -132,9 +131,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         btnManualMoveOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //toast.setText("Привет! Уведомление о проблемах с заказом отправлено оператору");
-                toast.setText("Смена координат");
-                toast.show();
+                Log.d("Location", String.format("Courier coordinates changed"));
                 if (courier != null && courier.getCurrentCoordinate() != null) {
                     courier.setCurrentCoordinate(new Coordinate(courier.getCurrentCoordinate().getLat() - coordinateCounter,
                             courier.getCurrentCoordinate().getLng() - coordinateCounter));
@@ -150,8 +147,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         btnHelpOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toast.setText("Внимание! Уведомление о проблемах с заказом отправлено оператору");
-                toast.show();
+                ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
                 try {
                     /*Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("3301214"));
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -159,8 +155,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
                     //StandardIntentsHelper.callPhoneIntent(mainMapsActivity, "3301214");
                 }
                 catch (SecurityException ex) {
-                    toast.setText("Call forbidden");
-                    toast.show();
+                    ToolsHelper.showMsgToUser(Constants.MSG_CALL_FORBIDDEN, toast);
                 }
                 /*Intent callIntent = new Intent(Intent.ACTION_CALL);
                 callIntent.setData(Uri.parse(phone_no));
@@ -169,16 +164,24 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
         };
 
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //setContentView(R.layout.activity_login);
+                ActivityHelper.changeActivity(getApplicationContext(), mainMapsActivity, LoginActivity.class, 0);
+            }
+        });
 
     }
 
     private void initGUI() {
-        initGUIListeners();
         autoComplFrom = (AutoCompleteTextView) findViewById(R.id.autoComplFrom);
         autoComplTo = (AutoCompleteTextView) findViewById(R.id.autoComplTo);
 
         btnHelp = (Button) findViewById(R.id.btnHelp);
         btnHelp.setOnClickListener(btnHelpOnClickListener);
+
+        btnLogout = (Button) findViewById(R.id.btnLogout);
 
         btnManualMove = (Button) findViewById(R.id.btnManualMove);
         btnManualMove.setOnClickListener(btnManualMoveOnClickListener);
@@ -186,11 +189,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         layoutHorizontal = (LinearLayout) findViewById(R.id.layoutHorizontal);
         layoutHorizontal.setVisibility(View.VISIBLE);
 
-        final String[] mCats = {"Мурзик", "Рыжик", "Барсик", "Борис",
-                "Мурзилка", "Мурка"};
-        autoComplFrom.setAdapter(new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, mCats));
-        autoComplFrom.setThreshold(1);
-
+        initGUIListeners();
     }
 
 
@@ -209,8 +208,9 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
                 courier.setCurrentCoordinate(changedLocation);
                 courier.requestDataFromServer(mainMapsActivity);
 
-                toast.setText("Отправка текущих координат курьера...");
-                toast.show();
+                //toast.setText("Отправка текущих координат курьера...");
+                //toast.show();
+                Log.d("Request", String.format("Courier %s coordinates has sent (lat = %s, lng = %s)", courier.getId(), courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()));
             }
             /*checkEnabled();
             showLocation(location);
@@ -420,14 +420,6 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     public void setCourier(Courier courier) {
         this.courier = courier;
-    }
-
-    public String getServerAddress() {
-        return serverAddress;
-    }
-
-    public void setServerAddress(String serverAddress) {
-        this.serverAddress = serverAddress;
     }
 
     public LocationManager getLocationManager() {

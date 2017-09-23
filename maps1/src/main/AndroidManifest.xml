@@ -36,6 +36,14 @@
             android:name=".MainMapsActivity"
             android:launchMode="singleTop"
             android:label="@string/title_activity_main_maps" >
+
+
+        </activity>
+
+        <activity
+            android:name=".LoginActivity"
+            android:launchMode="singleTop"
+            android:label="@string/title_activity_login" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

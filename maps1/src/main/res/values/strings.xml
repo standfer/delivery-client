@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Maps1</string>
     <string name="title_activity_main_maps">Map</string>
+    <string name="title_activity_login">LoginActivity</string>
 </resources>
