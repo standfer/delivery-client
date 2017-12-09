@@ -10,13 +10,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.hello.maps1.constants.Constants;
+import com.example.hello.maps1.entities.Coordinate;
+import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.helpers.ActivityHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
@@ -28,8 +29,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -56,9 +55,6 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
     private Button btnHelp;
     private Button btnManualMove;
     private Button btnLogout;
-    View.OnClickListener btnHelpOnClickListener;
-    View.OnClickListener btnManualMoveOnClickListener;
-    View.OnClickListener btnLoginOnClickListener;
     LinearLayout layoutHorizontal;
     private AutoCompleteTextView autoComplFrom, autoComplTo;
 
@@ -74,7 +70,6 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mainMapsActivity = this;
-
         isRouteNeed = true;
         setContentView(R.layout.activity_main_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -85,7 +80,6 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         initGUI();//создание кнопок и вешание listeners
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
 
         idCourier = getIntent ().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
@@ -128,10 +122,14 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     private void initGUIListeners() {
-        btnManualMoveOnClickListener = new View.OnClickListener() {
+        btnManualMove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("Location", String.format("Courier coordinates changed"));
+                //workaround if current position could not be find, must be deleted
+                /*if (courier != null && courier.getCurrentCoordinate() == null) {
+                    courier.setCurrentCoordinate(new Coordinate(53.144657,50.0168557));
+                }*/
                 if (courier != null && courier.getCurrentCoordinate() != null) {
                     courier.setCurrentCoordinate(new Coordinate(courier.getCurrentCoordinate().getLat() - coordinateCounter,
                             courier.getCurrentCoordinate().getLng() - coordinateCounter));
@@ -142,9 +140,9 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
                 //startActivity(intent);
                 //StandardIntentsHelper.callPhoneIntent(mainMapsActivity, "3301214");
             }
-        };
+        });
 
-        btnHelpOnClickListener = new View.OnClickListener() {
+        btnHelp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
@@ -162,7 +160,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
                 callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(callIntent);*/
             }
-        };
+        });
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,12 +177,8 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         autoComplTo = (AutoCompleteTextView) findViewById(R.id.autoComplTo);
 
         btnHelp = (Button) findViewById(R.id.btnHelp);
-        btnHelp.setOnClickListener(btnHelpOnClickListener);
-
         btnLogout = (Button) findViewById(R.id.btnLogout);
-
         btnManualMove = (Button) findViewById(R.id.btnManualMove);
-        btnManualMove.setOnClickListener(btnManualMoveOnClickListener);
 
         layoutHorizontal = (LinearLayout) findViewById(R.id.layoutHorizontal);
         layoutHorizontal.setVisibility(View.VISIBLE);
@@ -197,7 +191,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         @Override
         public void onLocationChanged(Location location) {
             //if(courier.isRebuildRouteNeeded(changedLocation) || courier.getCurrentCoordinate() == null) {
-            if (true || courier.getCurrentCoordinate() == null) {// || isGpsLocation(location) || courier.getCurrentCoordinate() == null) {
+            if (/*true ||*/ courier.getCurrentCoordinate() == null) {// || isGpsLocation(location) || courier.getCurrentCoordinate() == null) {
                 /*location.setLatitude(location.getLatitude() + coordinateCounter);
                 location.setLongitude(location.getLongitude() + coordinateCounter);
                 coordinateCounter += 0.001;*/

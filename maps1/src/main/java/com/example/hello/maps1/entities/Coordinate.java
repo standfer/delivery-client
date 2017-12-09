@@ -1,4 +1,4 @@
-package com.example.hello.maps1;
+package com.example.hello.maps1.entities;
 
 import android.location.Location;
 import android.location.LocationManager;

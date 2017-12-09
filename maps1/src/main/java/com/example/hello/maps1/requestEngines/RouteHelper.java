@@ -2,7 +2,7 @@ package com.example.hello.maps1.requestEngines;
 
 import android.graphics.Color;
 
-import com.example.hello.maps1.Coordinate;
+import com.example.hello.maps1.entities.Coordinate;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 

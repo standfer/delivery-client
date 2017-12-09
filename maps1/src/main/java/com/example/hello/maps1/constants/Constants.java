@@ -5,7 +5,7 @@ package com.example.hello.maps1.constants;
  */
 
 public interface Constants {
-    String SERVER_ADDRESS = "http://192.168.1.36/delivery/helpers/helper.php";
+    String SERVER_ADDRESS = "http://192.168.1.34/delivery/helpers/helper.php";
     String MSG_ORDER_PROBLEMS = "Внимание! Уведомление о проблемах с заказом отправлено оператору";
     String MSG_CALL_FORBIDDEN = "Call forbidden";
 

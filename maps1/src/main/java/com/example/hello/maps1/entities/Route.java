@@ -1,7 +1,5 @@
 package com.example.hello.maps1.entities;
 
-import com.example.hello.maps1.Coordinate;
-
 /**
  * Created by Ivan on 11.03.2017.
  */

@@ -1,9 +1,6 @@
 package com.example.hello.maps1.entities;
 
-import com.example.hello.maps1.Coordinate;
-
-import java.util.ArrayList;
-import java.util.List;
+//import org.joda.time.DateTime;
 
 /**
  * Created by Ivan on 12.03.2017.
@@ -15,6 +12,10 @@ public class Order {
     private String phoneNumber;
     private double cost;
     private boolean isDelivered;
+
+    //private DateTime create_ts;
+    //private DateTime deliver_ts;
+    private boolean isAppotinted;
 
     private Coordinate addressCoordinate;
     private WorkPlace workPlace;
@@ -98,4 +99,28 @@ public class Order {
     public void setWorkPlace(WorkPlace workPlace) {
         this.workPlace = workPlace;
     }
+
+    public boolean isAppotinted() {
+        return isAppotinted;
+    }
+
+    public void setAppotinted(boolean appotinted) {
+        isAppotinted = appotinted;
+    }
+
+    /*public DateTime getCreate_ts() {
+        return create_ts;
+    }
+
+    public void setCreate_ts(DateTime create_ts) {
+        this.create_ts = create_ts;
+    }
+
+    public DateTime getDeliver_ts() {
+        return deliver_ts;
+    }
+
+    public void setDeliver_ts(DateTime deliver_ts) {
+        this.deliver_ts = deliver_ts;
+    }*/
 }

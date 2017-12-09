@@ -1,12 +1,13 @@
 package com.example.hello.maps1;
 
 import android.app.AlarmManager;
-import android.content.Intent;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 
 
 import com.example.hello.maps1.constants.Constants;
+import com.example.hello.maps1.entities.Coordinate;
+import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.helpers.NotificationHelper;
 import com.example.hello.maps1.requestEngines.RequestHelper;
@@ -22,9 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
@@ -87,7 +85,7 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
             responseCourierData = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, "action=updateCourierLocation&courier=" + RequestHelper.convertObjectToJson(courier));//"courier=" + RequestHelper.convertObjectToJson(courier));
             timeDifference = System.currentTimeMillis() - timeDifference;
             Log.d("Time4Request", timeDifference.toString());
-            courier.setData(responseCourierData);
+            courier.setData(responseCourierData); // add here check if a driver wants to apply new order
 
             if (courier.getCurrentCoordinate() != null) {
                 routeToDestination = RequestHelper.requestRouteByCoordinates(courier.getCurrentCoordinate(), courier.getDestinationCoordinate(), courier.getOrders());
@@ -141,9 +139,20 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
         }
     }
 
-
-
     private void addWaypointMarkers(List<Order> orders, GoogleMap map) {
+        int i = 0;
+        for(Order order : orders) {
+            LatLng orderPosition = new LatLng(order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+            String orderSnippet = String.format(
+                    "Адрес: %s\n" +
+                            "Телефон: %s\n" +
+                            "Стоимость: %s\n", order.getAddress(), order.getPhoneNumber(), order.getCost()); //responseCourierData);
+            mainMapsActivity.getmMap().addMarker(new MarkerOptions().position(orderPosition).title("Доставить по адресу:" + i).snippet(orderSnippet).draggable(false));
+            i++;
+        }
+    }
+
+    private void addWaypointMarkersWithWorkplaces(List<Order> orders, GoogleMap map) {
         int i = 0;
         for(Order order : orders) {
             LatLng workPlacePosition = new LatLng(order.getWorkPlace().getLocation().getLat(), order.getWorkPlace().getLocation().getLng());

@@ -1,6 +1,6 @@
 package com.example.hello.maps1.requestEngines;
 
-import com.example.hello.maps1.Coordinate;
+import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.google.gson.Gson;
@@ -106,11 +106,12 @@ public class RequestHelper {
         try {
             String urlBuilder = "https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng();
             for (Order order : orders) {
-                //add waypoint for workPlace
                 urlBuilder += urlBuilder.indexOf("waypoints") == -1 ? "&waypoints=via:" : "|";
-                urlBuilder += String.format("%s,%s|", order.getWorkPlace().getLocation().getLat(), order.getWorkPlace().getLocation().getLng());
-                //add waypoint for address order
-                urlBuilder += String.format("%s,%s", order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+
+                if (orders.indexOf(order) < orders.size() - 1) {
+                    //add waypoint for address order except destination coordinate
+                    urlBuilder += String.format("%s,%s", order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+                }
             }
             if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
@@ -163,6 +164,43 @@ public class RequestHelper {
         return "";
     }
 
+    public static String requestRouteByCoordinatesWithWorkplaces(Coordinate origin, Coordinate destination, List<Order> orders) {
+        HttpURLConnection connection = null;
+        try {
+            String urlBuilder = "https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng();
+            for (Order order : orders) {
+                //add waypoint for workPlace
+                urlBuilder += urlBuilder.indexOf("waypoints") == -1 ? "&waypoints=via:" : "|";
+                urlBuilder += String.format("%s,%s|", order.getWorkPlace().getLocation().getLat(), order.getWorkPlace().getLocation().getLng());
+
+                if (orders.indexOf(order) < orders.size()) {
+                    //add waypoint for address order except destination coordinate
+                    urlBuilder += String.format("%s,%s", order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+                }
+            }
+            if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
+                destination = new Coordinate(origin.getLat(), origin.getLng());
+            }
+            urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
+                    "&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
+            URL url = new URL(urlBuilder);
+            connection = (HttpURLConnection) url.openConnection();
+            //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+            InputStream in = new BufferedInputStream(connection.getInputStream());//);url.openStream()
+            return readStream(in);
+            //else returnString = "failed";
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+        return "";
+    }
+
     private static String readStream(InputStream is) throws IOException {
         StringBuilder sb = new StringBuilder();
         BufferedReader r = new BufferedReader(new InputStreamReader(is), 1000);
@@ -175,8 +213,8 @@ public class RequestHelper {
 
     public static String convertObjectToJson(Object object) {//сериализация объекта в json
         try {
-            if (object instanceof com.example.hello.maps1.Courier) {
-                ((com.example.hello.maps1.Courier)object).clear();
+            if (object instanceof Courier) {
+                ((Courier)object).clear();
             }
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             return gson.toJson(object);
