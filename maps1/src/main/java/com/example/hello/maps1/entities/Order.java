@@ -2,22 +2,48 @@ package com.example.hello.maps1.entities;
 
 //import org.joda.time.DateTime;
 
+import com.example.hello.maps1.entities.adapters.DateTimeAdapter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import org.joda.time.DateTime;
+
 /**
  * Created by Ivan on 12.03.2017.
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Order {
+
+    private int id;
 
     private String address;
     private String phoneNumber;
     private double cost;
+
+    @JsonIgnore
     private boolean isDelivered;
 
-    //private DateTime create_ts;
-    //private DateTime deliver_ts;
+    @JsonProperty("create_ts")
+    @JsonDeserialize(using = DateTimeAdapter.Deserializer.class)
+    @JsonSerialize(using = DateTimeAdapter.Serializer.class)
+    private DateTime createTs;
+
+    @JsonProperty("deliver_ts")
+    @JsonDeserialize(using = DateTimeAdapter.Deserializer.class)
+    @JsonSerialize(using = DateTimeAdapter.Serializer.class)
+    private DateTime deliverTs;
+
     private boolean isAppotinted;
 
-    private Coordinate addressCoordinate;
+    @JsonProperty("location")
+    private Coordinate location;
+
+    @JsonProperty("workPlace")
     private WorkPlace workPlace;
 
 
@@ -36,7 +62,7 @@ public class Order {
         this.phoneNumber = phoneNumber;
         this.cost = cost;
         setDelivered(isDelivered);
-        this.addressCoordinate = new Coordinate(lat, lng);
+        this.location = new Coordinate(lat, lng);
         this.workPlace = new WorkPlace(idWorkPlace, addressWorkPlace, latWorkPlace, lngWorkPlace);
     }
 
@@ -84,12 +110,12 @@ public class Order {
                 this.isDelivered);
     }
 
-    public Coordinate getAddressCoordinate() {
-        return addressCoordinate;
+    public Coordinate getLocation() {
+        return location;
     }
 
-    public void setAddressCoordinate(Coordinate addressCoordinate) {
-        this.addressCoordinate = addressCoordinate;
+    public void setLocation(Coordinate location) {
+        this.location = location;
     }
 
     public WorkPlace getWorkPlace() {
@@ -108,19 +134,35 @@ public class Order {
         isAppotinted = appotinted;
     }
 
-    /*public DateTime getCreate_ts() {
-        return create_ts;
+    public DateTime getCreateTs() {
+        return createTs;
     }
 
-    public void setCreate_ts(DateTime create_ts) {
-        this.create_ts = create_ts;
+    public void setCreateTs(DateTime createTs) {
+        this.createTs = createTs;
     }
 
-    public DateTime getDeliver_ts() {
-        return deliver_ts;
+    public DateTime getDeliverTs() {
+        return deliverTs;
     }
 
-    public void setDeliver_ts(DateTime deliver_ts) {
-        this.deliver_ts = deliver_ts;
-    }*/
+    public void setDeliverTs(DateTime deliverTs) {
+        this.deliverTs = deliverTs;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getData() {
+        return String.format(
+                "Order %s\n" +
+                "Address: %s\n" +
+                "Phone: %s\n" +
+                "Cost: %s\n", this.getId(), this.getAddress(), this.getPhoneNumber(), this.getCost());
+    }
 }

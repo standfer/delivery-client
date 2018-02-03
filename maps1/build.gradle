@@ -1,5 +1,17 @@
 apply plugin: 'com.android.application'
 
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.google.android.gms:play-services:8.3.0'
+    compile 'com.google.code.gson:gson:2.7'
+    compile files('libs/jackson-core-2.9.2.jar')
+    compile files('libs/jackson-annotations-2.9.2.jar')
+    compile files('libs/jackson-databind-2.9.2.jar')
+    compile files('libs/joda-time-2.1.jar')
+}
+
 android {
     compileSdkVersion 23
     buildToolsVersion '23.0.2'
@@ -8,6 +20,8 @@ android {
         applicationId "com.example.hello.maps1"
         minSdkVersion 14
         targetSdkVersion 23
+        // Enabling multidex support.
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
     }
@@ -26,12 +40,21 @@ android {
             signingConfig signingConfigs.release
         }
     }
-}
 
-dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.google.android.gms:play-services:8.3.0'
-    compile 'com.google.code.gson:gson:2.7'
+    packagingOptions {//TODO CHECK ISSUE HOW AVOID DISABLING LICENSES AND PLUG jackson-databind...
+        exclude 'libs/jackson-core-2.9.2.jar'
+        exclude 'libs/jackson-annotations-2.9.2.jar'
+        exclude 'libs/jackson-databind-2.9.2.jar'
+        exclude 'libs/joda-time-2.1.jar'
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
+    }
 }

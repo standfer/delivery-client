@@ -1,13 +1,17 @@
 package com.example.hello.maps1;
 
 import android.Manifest;
+import android.app.DialogFragment;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -18,7 +22,10 @@ import android.widget.Toast;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
+import com.example.hello.maps1.entities.Order;
+import com.example.hello.maps1.gui.dialogs.OrdersDialog;
 import com.example.hello.maps1.helpers.ActivityHelper;
+import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
 import com.google.android.gms.maps.GoogleMap;
@@ -46,6 +53,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
     private Courier courier;
     private int idCourier = 10;
     private double coordinateCounter = 0.001;
+    private int orderCounter = 0;
 
     //private String serverAddress = "http://185.26.113.131/ilkato/helper.php";//"http://192.168.1.5";// "http://192.168.43.185";//
     //private String serverAddress = "http://192.168.43.185";//
@@ -54,6 +62,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
     //GUI
     private Button btnHelp;
     private Button btnManualMove;
+    private Button btnMoveToNextOrder;
     private Button btnLogout;
     LinearLayout layoutHorizontal;
     private AutoCompleteTextView autoComplFrom, autoComplTo;
@@ -121,6 +130,12 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         //locationManager.removeUpdates(locationListener);
     }
 
+    public void showOrdersDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        OrdersDialog dialog = new OrdersDialog();
+        dialog.show(fm, "my_tag");
+    }
+
     private void initGUIListeners() {
         btnManualMove.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,6 +149,30 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
                     courier.setCurrentCoordinate(new Coordinate(courier.getCurrentCoordinate().getLat() - coordinateCounter,
                             courier.getCurrentCoordinate().getLng() - coordinateCounter));
                     coordinateCounter += 0.001;
+                    courier.requestDataFromServer(mainMapsActivity);
+                }
+                //Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("3301214"));
+                //startActivity(intent);
+                //StandardIntentsHelper.callPhoneIntent(mainMapsActivity, "3301214");
+            }
+        });
+
+        btnMoveToNextOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Location", String.format("Courier coordinates changed to next order"));
+                if (courier != null && courier.getCurrentCoordinate() != null && !CollectionsHelper.isEmpty(courier.getOrders())) {
+                    List<Order> orders = courier.getOrders();
+                    Order orderToMove = orders.get(0);
+                    if (orders.size() > orderCounter) {
+                        orderToMove = orders.get(orderCounter++);
+                    } else {
+                        orderCounter = 0;
+                    }
+
+                    Coordinate nextCoordinate = new Coordinate(orderToMove.getLocation().getLat(), orderToMove.getLocation().getLng());
+
+                    courier.setCurrentCoordinate(nextCoordinate);
                     courier.requestDataFromServer(mainMapsActivity);
                 }
                 //Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("3301214"));
@@ -179,6 +218,7 @@ public class MainMapsActivity extends FragmentActivity implements OnMapReadyCall
         btnHelp = (Button) findViewById(R.id.btnHelp);
         btnLogout = (Button) findViewById(R.id.btnLogout);
         btnManualMove = (Button) findViewById(R.id.btnManualMove);
+        btnMoveToNextOrder = (Button) findViewById(R.id.btnMoveToNextOrder);
 
         layoutHorizontal = (LinearLayout) findViewById(R.id.layoutHorizontal);
         layoutHorizontal.setVisibility(View.VISIBLE);

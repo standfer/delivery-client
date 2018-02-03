@@ -8,20 +8,22 @@ import android.os.AsyncTask;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
+import com.example.hello.maps1.entities.responses.Infos;
 import com.example.hello.maps1.entities.Order;
+import com.example.hello.maps1.entities.responses.OrdersResponse;
 import com.example.hello.maps1.helpers.NotificationHelper;
 import com.example.hello.maps1.requestEngines.RequestHelper;
 import com.example.hello.maps1.requestEngines.RouteHelper;
+//import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.content.Context;
 import android.util.Log;
@@ -41,12 +43,11 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
     private Toast toast;
     private List<Coordinate> routePoints;
 
+    private List<Order> ordersUnassigned;
 
     private String responseCourierData = "";
 
     private Courier courier;
-
-    private static final int NOTIFY_ID = 101;
 
     public NetworkDAO() {
         //locationManager =(LocationManager) mainMapsActivity.getSystemService(Context.LOCATION_SERVICE);
@@ -54,25 +55,6 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
 
     public NetworkDAO(MainMapsActivity mma) {
     }
-
-    private int routeInSeconds(String answerRoute) {
-        try {
-            JSONObject jsonObject = new JSONObject(answerRoute);
-
-            JSONArray routes = jsonObject.getJSONArray("routes");
-            JSONObject route = new JSONObject(routes.getString(0));
-            JSONArray legs = route.getJSONArray("legs");
-            JSONObject legsObject = new JSONObject(legs.getString(0));
-
-            JSONObject durationObject = legsObject.getJSONObject("duration_in_traffic");
-
-            return Integer.parseInt(durationObject.getString("value"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
 
     @Override
     protected Void doInBackground(MainMapsActivity... mainMapsActivities) {
@@ -83,9 +65,11 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
             Long timeDifference = System.currentTimeMillis();
             //responseCourierData = RequestHelper.resultPostRequest(mainMapsActivity.getServerAddress(), "action=setCourierCoords&courier=" + RequestHelper.convertObjectToJson(shortCourier));
             responseCourierData = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, "action=updateCourierLocation&courier=" + RequestHelper.convertObjectToJson(courier));//"courier=" + RequestHelper.convertObjectToJson(courier));
+            ordersUnassigned = getOrdersUnassigned(RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, "action=getOrdersUnassigned"));
+
             timeDifference = System.currentTimeMillis() - timeDifference;
             Log.d("Time4Request", timeDifference.toString());
-            courier.setData(responseCourierData); // add here check if a driver wants to apply new order
+            courier.updateData(responseCourierData, ordersUnassigned); // add here check if a driver wants to apply new order
 
             if (courier.getCurrentCoordinate() != null) {
                 routeToDestination = RequestHelper.requestRouteByCoordinates(courier.getCurrentCoordinate(), courier.getDestinationCoordinate(), courier.getOrders());
@@ -99,14 +83,15 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
         return null;
     }
 
-
     @Override
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
-        //routePoints = MyIntentService.pointsCoordinates(answerOldBridge);
+        List<Coordinate> routePoints = MyIntentService.pointsCoordinates(routeToDestination);
 
         toast = Toast.makeText(mainMapsActivity.getApplicationContext(), "", Toast.LENGTH_LONG);
-        changeMapsGuiData(this.mainMapsActivity, MyIntentService.pointsCoordinates(routeToDestination));
+        changeMapsGuiData(this.mainMapsActivity, routePoints);
+
+        courier.tryToAssignAvailableOrders(mainMapsActivity);
 
         //showNotification(messageRoute);
     }
@@ -116,14 +101,16 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
         //mainMapsActivity.setMrkCurrentPos(messageRoute);
         mainMapsActivity.getMrkCurrentPos().showInfoWindow();
 
-        mainMapsActivity.getmMap().addPolyline(RouteHelper.getRoutePolyline(routePoints));
+        PolylineOptions routeLine = RouteHelper.getRoutePolyline(routePoints);
+        mainMapsActivity.getmMap().addPolyline(routeLine);
         mainMapsActivity.setRoutePoints(routePoints);
 
         LatLng initPosition = new LatLng(routePoints.get(0).getLat(), routePoints.get(0).getLng());
         //LatLng destPosition = new LatLng(routePoints.get(routePoints.size() - 1).getLat(), routePoints.get(routePoints.size() - 1).getLng());
-        mainMapsActivity.getmMap().moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 10));
 
+        mainMapsActivity.getmMap().moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 10));
         mainMapsActivity.getmMap().addMarker(new MarkerOptions().position(initPosition).title("Вы здесь").draggable(false));
+
         addWaypointMarkers(courier.getOrders(), mainMapsActivity.getmMap());
 
         try {
@@ -134,19 +121,18 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
                 courier.getOrder().setDelivered(true);
                 NotificationHelper.showNotification(mainMapsActivity, Constants.MSG_ORDER_TITLE, Constants.MSG_ORDER_IS_DELIVERED);
             }
-        } catch(Throwable ex) {
-
-        }
+        } catch(Throwable ex) { }
     }
 
     private void addWaypointMarkers(List<Order> orders, GoogleMap map) {
         int i = 0;
         for(Order order : orders) {
-            LatLng orderPosition = new LatLng(order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+            LatLng orderPosition = new LatLng(order.getLocation().getLat(), order.getLocation().getLng());
             String orderSnippet = String.format(
                     "Адрес: %s\n" +
-                            "Телефон: %s\n" +
-                            "Стоимость: %s\n", order.getAddress(), order.getPhoneNumber(), order.getCost()); //responseCourierData);
+                    "Телефон: %s\n" +
+                    "Стоимость: %s\n", order.getAddress(), order.getPhoneNumber(), order.getCost()); //responseCourierData);
+
             mainMapsActivity.getmMap().addMarker(new MarkerOptions().position(orderPosition).title("Доставить по адресу:" + i).snippet(orderSnippet).draggable(false));
             i++;
         }
@@ -156,7 +142,7 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
         int i = 0;
         for(Order order : orders) {
             LatLng workPlacePosition = new LatLng(order.getWorkPlace().getLocation().getLat(), order.getWorkPlace().getLocation().getLng());
-            LatLng orderPosition = new LatLng(order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+            LatLng orderPosition = new LatLng(order.getLocation().getLat(), order.getLocation().getLng());
             String workPlaceSnippet = String.format("Адрес: %s", order.getWorkPlace().getAddress());
             String orderSnippet = String.format(
                     "Адрес: %s\n" +
@@ -165,6 +151,30 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
             mainMapsActivity.getmMap().addMarker(new MarkerOptions().position(workPlacePosition).title("Забрать из:" + i).snippet(workPlaceSnippet).draggable(false));
             mainMapsActivity.getmMap().addMarker(new MarkerOptions().position(orderPosition).title("Доставить по адресу:" + i).snippet(orderSnippet).draggable(false));
             i++;
+        }
+    }
+
+    private List<Order> getOrdersUnassigned(String responseOrders) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            OrdersResponse ordersResponse = objectMapper.readValue(responseOrders, OrdersResponse.class);
+
+            return ordersResponse.getOrders();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+    private void mapDtoFromServer(String responseInfo) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Infos infos = objectMapper.readValue(responseInfo, Infos.class);
+
+            String address = infos.getInfos().get(0).getAddress();
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 
@@ -180,71 +190,4 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
         am = (AlarmManager) mainMapsActivity.getSystemService(Context.ALARM_SERVICE);
 
     }
-
 }
-
-
-//    private String responseGet(String urlRequest){
-//        /* hc = new DefaultHttpClient();
-//        ResponseHandler response = new BasicResponseHandler();
-//        HttpGet http = new HttpGet("http://site.ru/api.php?login=user1&psw=1234");
-////получаем ответ от сервера
-//        String response = (String) hc.execute(http, response);*/
-//        return "response";
-//    }
-
-    /*private String sendDataRequest(String urlRequest) {
-        HttpURLConnection connection = null;
-        try {
-            URL url = new URL(urlRequest);
-
-
-            connection.setRequestMethod("POST");
-            //connection.setDoInput(true);
-            connection.setDoOutput(true);
-
-            connection = (HttpURLConnection) url.openConnection();
-//            ObjectOutputStream ous = new ObjectOutputStream(connection.getOutputStream());
-//            ous.writeObject(new Coordinate(53.5, 50.6));
-//            ous.close();
-
-            OutputStream os = new BufferedOutputStream(connection.getOutputStream());
-            os.write(new Coordinate(53.5, 50.6).toJson().getBytes());
-            // Read response
-            StringBuilder responseSB = new StringBuilder();
-            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-
-            //String response = request("http://192.168.1.43/ilkato/helperC.php?action=getCouriers");
-            return "readStream(in)";
-            //else returnString = "failed";
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if(connection != null) connection.disconnect();
-        }
-        return "";
-    }*/
-
-
-//Intent intent = new Intent("com.rj.notitfications.SECACTIVITY");
-//PendingIntent pendingIntent = PendingIntent.getActivity(mainMapsActivity, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-/*Notification.Builder builder = new Notification.Builder(context)
-                .setTicker(messageRoute)
-                .setWhen(System.currentTimeMillis())
-                //.setAutoCancel(true)
-                .setContentTitle("Маршрут до работы")
-                .setContentText(messageRoute);
-        Notification notification = builder.getNotification();
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(NOTIFY_ID, notification);*/
-        /*Toast toast = Toast.makeText(mainMapsActivity.getApplicationContext(),
-                "Пора покормить кота!",
-                Toast.LENGTH_SHORT);
-        toast.show();*/

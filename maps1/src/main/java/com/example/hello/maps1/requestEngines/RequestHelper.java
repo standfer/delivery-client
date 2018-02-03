@@ -110,7 +110,7 @@ public class RequestHelper {
 
                 if (orders.indexOf(order) < orders.size() - 1) {
                     //add waypoint for address order except destination coordinate
-                    urlBuilder += String.format("%s,%s", order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+                    urlBuilder += String.format("%s,%s", order.getLocation().getLat(), order.getLocation().getLng());
                 }
             }
             if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
@@ -175,7 +175,7 @@ public class RequestHelper {
 
                 if (orders.indexOf(order) < orders.size()) {
                     //add waypoint for address order except destination coordinate
-                    urlBuilder += String.format("%s,%s", order.getAddressCoordinate().getLat(), order.getAddressCoordinate().getLng());
+                    urlBuilder += String.format("%s,%s", order.getLocation().getLat(), order.getLocation().getLng());
                 }
             }
             if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {

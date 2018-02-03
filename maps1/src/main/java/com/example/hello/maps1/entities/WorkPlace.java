@@ -1,9 +1,12 @@
 package com.example.hello.maps1.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Created by Ivan on 14.05.2017.
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkPlace {
     private int id;
     private String address;
