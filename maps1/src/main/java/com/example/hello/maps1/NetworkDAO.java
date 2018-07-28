@@ -93,6 +93,8 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
 
         courier.tryToAssignAvailableOrders(mainMapsActivity);
 
+        mainMapsActivity.updateGui(courier);
+
         //showNotification(messageRoute);
     }
 

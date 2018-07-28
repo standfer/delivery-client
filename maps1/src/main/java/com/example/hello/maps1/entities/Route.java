@@ -1,5 +1,7 @@
 package com.example.hello.maps1.entities;
 
+import com.google.android.gms.maps.model.PolylineOptions;
+
 /**
  * Created by Ivan on 11.03.2017.
  */
@@ -9,6 +11,8 @@ public class Route {
     private Coordinate destination;
     private Coordinate waypoint;
     private String apiKey;
+
+    private PolylineOptions routeLine;
 
     private String templateRequest = "https://maps.googleapis.com/maps/api/directions/json?origin=%s&waypoints=via:%s&destination=%s&departure_time=now" +
             "&traffic_model=best_guess&key=%s";
@@ -57,5 +61,13 @@ public class Route {
 
     public void setWaypoint(Coordinate waypoint) {
         this.waypoint = waypoint;
+    }
+
+    public PolylineOptions getRouteLine() {
+        return routeLine;
+    }
+
+    public void setRouteLine(PolylineOptions routeLine) {
+        this.routeLine = routeLine;
     }
 }

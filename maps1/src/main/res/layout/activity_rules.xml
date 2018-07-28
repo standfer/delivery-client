@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/etRules"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="false"
+        android:layout_centerInParent="false"
+        android:layout_centerVertical="false"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:ems="14"
+        android:inputType="textPersonName"
+        android:text="Правила" />
+
+    <EditText
+        android:id="@+id/etRulesContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/etRules"
+        android:gravity="center"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:text="@string/content_rules" />
+</RelativeLayout>

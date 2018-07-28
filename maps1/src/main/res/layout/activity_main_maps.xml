@@ -1,138 +1,203 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:orientation="vertical">
 
     <fragment
-        android:layout_width="match_parent"
-        android:layout_height="156dp" android:id="@+id/map" tools:context=".MainMapsActivity"
+        android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_weight="1.29" />
+        tools:context=".MainMapsActivity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="100"
+        map:uiZoomControls="false"/>
 
     <LinearLayout
         android:id="@+id/layoutHorizontal"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:visibility="invisible">
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:visibility="visible">
 
-        <AutoCompleteTextView
-            android:text=""
+        <Button
+            android:id="@+id/btnOrder1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/autoComplFrom"
-            android:layout_weight="1"
-            android:contentDescription="From"
-            android:visibility="invisible"/>
+            android:layout_centerInParent="true"
+            android:background="@android:color/holo_red_light"
+            android:checked="false"
+            android:onClick="onClickBtnManualMove"
+            android:text="Заказ 1"
+            android:visibility="invisible"></Button>
 
-        <EditText
+        <Button
+            android:id="@+id/btnOrder2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="textMultiLine"
-            android:ems="10"
-            android:id="@+id/editOrderDetails"
-            android:layout_weight="1"
-            android:visibility="invisible"/>
+            android:layout_centerInParent="true"
+            android:background="@android:color/holo_green_light"
+            android:checked="false"
+            android:onClick="onClickBtnManualMove"
+            android:text="Заказ 2"
+            android:visibility="invisible"></Button>
 
-        <AutoCompleteTextView
-            android:text=""
+        <Button
+            android:id="@+id/btnOrder3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/autoComplTo"
-            android:layout_weight="1"
-            android:visibility="invisible"/>
+            android:layout_centerInParent="true"
+            android:background="@android:color/holo_green_light"
+            android:checked="false"
+            android:onClick="onClickBtnManualMove"
+            android:text="Заказ 3"
+            android:visibility="invisible"></Button>
 
+        <Button
+            android:id="@+id/btnOrder4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@android:color/holo_green_light"
+            android:checked="false"
+            android:onClick="onClickBtnManualMove"
+            android:text="Заказ 4"
+            android:visibility="invisible"></Button>
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <EditText
+            android:id="@+id/etStartOrderDeadine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:enabled="false"
+            android:inputType="textPersonName"
+            android:text="1-й заказ до    22:30" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <EditText
+            android:id="@+id/etFinishOrderDeadine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:inputType="textPersonName"
+            android:text="последний до 23:20" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutHorizontalNotNeed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:visibility="invisible">
+
         <Button
             android:id="@+id/btnManualMove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="false"
             android:onClick="onClickBtnManualMove"
             android:text="Эмуляция движения"
-            android:checked="false"
-            android:layout_centerInParent="true"
-            android:visibility="visible">
-        </Button>
+            android:visibility="visible"></Button>
 
-        <Button
-            android:id="@+id/btnMoveToNextOrder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClickBtnMoveToNextOrder"
-            android:text="Следующий заказ"
-            android:checked="false"
-            android:layout_centerInParent="true"
-            android:visibility="invisible">
-        </Button>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
         <Button
             android:id="@+id/btnHelp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="false"
             android:onClick="onClickBtnHelp"
             android:text="SOS"
-            android:checked="false"
+            android:visibility="invisible"></Button>
+
+
+        <!--<Button
+            android:id="@+id/btnMoveToNextOrder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="visible">
-        </Button>
+            android:checked="false"
+            android:onClick="onClickBtnMoveToNextOrder"
+            android:text="Следующий заказ"
+            android:visibility="invisible"></Button>-->
+    </LinearLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        android:visibility="gone">
 
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:checked="false"
+            android:onClick="onClickBtnLogout"
+            android:text="Сменить пользователя"
+            android:visibility="visible"></Button>
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_weight="5">
+
         <Button
-            android:id="@+id/btnLogout"
+            android:id="@+id/btnCall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onClickBtnLogout"
-            android:text="Сменить пользователя"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="@android:color/holo_orange_light"
             android:checked="false"
-            android:layout_centerInParent="true"
-            android:visibility="visible">
-        </Button>
-
-
+            android:onClick="onClickBtnCall"
+            android:text="Позвонить оператору"
+            android:visibility="visible"></Button>
     </RelativeLayout>
-
 
     <LinearLayout
         android:id="@+id/layoutHorizontalButtons"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="80dp">
+        android:layout_height="80dp"
+        android:layout_weight="0"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
         <Button
             android:id="@+id/btnSuccess"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="false"
             android:onClick="onClickBtnSuccess"
             android:text="Готово"
-            android:checked="false"
-            android:visibility="invisible">
-        </Button>
+            android:visibility="invisible"></Button>
 
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="false"
             android:onClick="onClickBtnSuccess"
             android:text="Отменить"
-            android:checked="false"
-            android:visibility="invisible">
-        </Button>
+            android:visibility="invisible"></Button>
     </LinearLayout>
 
 </LinearLayout>
+
+

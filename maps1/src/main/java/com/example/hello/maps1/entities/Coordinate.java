@@ -11,11 +11,13 @@ import com.google.gson.GsonBuilder;
 
 import org.json.JSONException;
 
+import java.io.Serializable;
+
 /**
  * Created by ivan_grinenko on 14.08.2016.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Coordinate {
+public class Coordinate implements Serializable {
 
     @JsonProperty("latitude")
     private Double lat;

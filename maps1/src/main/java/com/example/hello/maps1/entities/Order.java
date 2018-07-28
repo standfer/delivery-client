@@ -2,6 +2,8 @@ package com.example.hello.maps1.entities;
 
 //import org.joda.time.DateTime;
 
+import android.support.annotation.NonNull;
+
 import com.example.hello.maps1.entities.adapters.DateTimeAdapter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,18 +14,23 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
+
 /**
  * Created by Ivan on 12.03.2017.
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Order {
+public class Order implements Comparable<Order>, Serializable {
 
     private int id;
 
     private String address;
     private String phoneNumber;
     private double cost;
+    private double odd;
+    private String notes;
+    private int priority;
 
     @JsonIgnore
     private boolean isDelivered;
@@ -46,6 +53,8 @@ public class Order {
     @JsonProperty("workPlace")
     private WorkPlace workPlace;
 
+    @JsonProperty("client")
+    private Client client;
 
     public Order(){}
 
@@ -56,14 +65,21 @@ public class Order {
         this.isDelivered = isDelivered;
     }
 
-    public Order(String address, double lat, double lng, String phoneNumber, double cost, int isDelivered,
-                 int idWorkPlace, String addressWorkPlace, double latWorkPlace, double lngWorkPlace) {
+    public Order(int id, String address, double lat, double lng,
+                 String phoneNumber, double cost, int isDelivered,
+                 int idWorkPlace, String addressWorkPlace, double latWorkPlace, double lngWorkPlace, int priority,
+                 double odd, String notes, int idClient, String clientName, String clientPhone) {
+        this.id = id;
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.cost = cost;
+        this.odd = odd;
+        this.notes = notes;
         setDelivered(isDelivered);
         this.location = new Coordinate(lat, lng);
         this.workPlace = new WorkPlace(idWorkPlace, addressWorkPlace, latWorkPlace, lngWorkPlace);
+        this.client = new Client(idClient, clientName, clientPhone);
+        this.priority = priority;
     }
 
     public String getAddress() {
@@ -164,5 +180,42 @@ public class Order {
                 "Address: %s\n" +
                 "Phone: %s\n" +
                 "Cost: %s\n", this.getId(), this.getAddress(), this.getPhoneNumber(), this.getCost());
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    @Override
+    public int compareTo(@NonNull Order another) {
+        return this.getPriority() < another.getPriority() ? -1 : (this.getPriority() == another.getPriority() ? 0 : 1);
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public double getOdd() {
+        return odd;
+    }
+
+    public void setOdd(double odd) {
+        this.odd = odd;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

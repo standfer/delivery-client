@@ -1,9 +1,13 @@
 package com.example.hello.maps1.requestEngines;
 
 import android.graphics.Color;
+import android.util.Pair;
 
+import com.example.hello.maps1.MyIntentService;
 import com.example.hello.maps1.entities.Coordinate;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
@@ -29,6 +33,31 @@ public class RouteHelper {
             polylineOptions.add(new LatLng(coordinate.getLat(), coordinate.getLng()));
         }
         return  polylineOptions;
+    }
+
+    public static PolylineOptions getRoutePolyline(Coordinate origin, Coordinate destination) {
+        String routeToDestination = RequestHelper.requestRouteByCoordinates(origin, destination);
+        List<Coordinate> routePoints = MyIntentService.pointsCoordinates(routeToDestination);
+
+        PolylineOptions routeLine = RouteHelper.getRoutePolyline(routePoints);
+
+        return  routeLine;
+    }
+
+    public static void addMarkersByCoordinates(GoogleMap map, List<Pair<Coordinate, String>> coordinateDatas) {
+        for (Pair<Coordinate, String> coordinateData : coordinateDatas) {
+            Coordinate coordinate = coordinateData.first;
+            String snippet = coordinateData.second;
+
+            LatLng position = new LatLng(coordinate.getLat(), coordinate.getLng());
+            String orderSnippet = snippet;
+
+            map.addMarker(new MarkerOptions()
+                    .position(position)
+                    .title(String.format("Заказ"))
+                    .snippet(orderSnippet)
+                    .draggable(false));
+        }
     }
     
     private static void incColorNumbers(Integer colorRed, Integer colorGreen, Integer colorBlue) {

@@ -2,12 +2,14 @@ package com.example.hello.maps1.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.io.Serializable;
+
 /**
  * Created by Ivan on 14.05.2017.
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WorkPlace {
+public class WorkPlace implements Serializable {
     private int id;
     private String address;
     private Coordinate location;

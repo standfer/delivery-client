@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,9 +24,11 @@ import java.util.Map;
 /**
  * Created by ivan_grinenko on 23.08.2016.
  */
-public class Courier {
+public class Courier implements Serializable {
     private int id;
     private String name;
+    private String surName;
+    private Long phone;
     private int idWorkPlace;
 
     private String login;
@@ -50,6 +53,10 @@ public class Courier {
     private double proximityAlertRadius = 300;
 
     public Courier() {
+    }
+
+    public Courier(int id) {
+        this.id = id;
     }
 
     public Courier(int id, String name, int idWorkPlace) {
@@ -239,6 +246,7 @@ public class Courier {
             for (int i = 0; i < orders.length(); i++) {
                 JSONObject order = new JSONObject(orders.getString(i));
                 this.orders.add(new Order(
+                        order.getInt("idOrder"),
                         order.getString("address"),
                         order.getDouble("lat"),
                         order.getDouble("lng"),
@@ -248,10 +256,17 @@ public class Courier {
                         order.getInt("idWorkplace"),
                         order.getString("addressWorkplace"),
                         order.getDouble("latWorkPlace"),
-                        order.getDouble("lngWorkPlace")
+                        order.getDouble("lngWorkPlace"),
+                        order.getInt("priority"),
+                        order.getDouble("odd"),
+                        order.getString("notes"),
+                        order.getInt("idClient"),
+                        order.getString("clientName"),
+                        order.getString("clientPhone")
                 ));
             }
             if(this.orders != null && !this.orders.isEmpty() && this.orders.get(0) != null) {
+                Collections.sort(this.orders);
                 this.destinationCoordinate = new Coordinate(this.orders.get(this.orders.size() - 1).getLocation().getLat(),
                         this.orders.get(this.orders.size() - 1).getLocation().getLng());
             }
@@ -371,5 +386,21 @@ public class Courier {
 
     public void setOrdersToAssign(List<Order> ordersToAssign) {
         this.ordersToAssign = ordersToAssign;
+    }
+
+    public String getSurname() {
+        return surName;
+    }
+
+    public void setSurname(String surName) {
+        this.surName = surName;
+    }
+
+    public Long getPhone() {
+        return phone;
+    }
+
+    public void setPhone(Long phone) {
+        this.phone = phone;
     }
 }

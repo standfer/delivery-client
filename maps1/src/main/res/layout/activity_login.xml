@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="0dp"
+    android:background="@drawable/title_background"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="370dp">
 
         <EditText
             android:id="@+id/etLogin"
@@ -30,7 +34,6 @@
     </RelativeLayout>
 
 
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -39,14 +42,12 @@
             android:id="@+id/btnLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:checked="false"
             android:onClick="onClickBtnLogin"
             android:text="Вход"
-            android:checked="false"
-            android:layout_centerInParent="true"
-            android:visibility="visible">
-        </Button>
+            android:visibility="visible"></Button>
     </RelativeLayout>
-
 
 
 </LinearLayout>
