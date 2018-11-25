@@ -2,7 +2,10 @@ package com.example.hello.maps1.helpers;
 
 import android.util.Log;
 
+import com.example.hello.maps1.entities.Order;
+import com.example.hello.maps1.entities.responses.Infos;
 import com.example.hello.maps1.entities.responses.OrdersResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -31,10 +34,28 @@ public class JSONHelper {
         }
     }
 
-    /*public Object getObjectFromJson(String response) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Object objectDTO = objectMapper.readValue(response, objectDTO.class);
+    public static Object getObjectFromJson(String response, Class classType) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Object objectDTO = objectMapper.readValue(response, classType);
 
+            return objectDTO;
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         return null;
-    }*/
+    }
+
+    private void mapDtoFromServer(String responseInfo) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            TypeReference<Order[]> typeReference = new TypeReference<Order[]>() {};
+            //List<Order> orders = objectMapper.readValue(responseInfo, typeReference);
+
+            Infos infos = objectMapper.readValue(responseInfo, Infos.class);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
 }

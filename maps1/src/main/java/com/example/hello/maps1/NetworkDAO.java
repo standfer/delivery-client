@@ -15,6 +15,7 @@ import com.example.hello.maps1.helpers.NotificationHelper;
 import com.example.hello.maps1.requestEngines.RequestHelper;
 import com.example.hello.maps1.requestEngines.RouteHelper;
 //import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -64,12 +65,13 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
 
             Long timeDifference = System.currentTimeMillis();
             //responseCourierData = RequestHelper.resultPostRequest(mainMapsActivity.getServerAddress(), "action=setCourierCoords&courier=" + RequestHelper.convertObjectToJson(shortCourier));
-            responseCourierData = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, "action=updateCourierLocation&courier=" + RequestHelper.convertObjectToJson(courier));//"courier=" + RequestHelper.convertObjectToJson(courier));
+            responseCourierData = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS,
+                    String.format("action=%s&courier=%s", Constants.METHOD_NAME_updateCourierLocation, RequestHelper.convertObjectToJson(courier)));//"courier=" + RequestHelper.convertObjectToJson(courier));
             ordersUnassigned = getOrdersUnassigned(RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, "action=getOrdersUnassigned"));
 
             timeDifference = System.currentTimeMillis() - timeDifference;
             Log.d("Time4Request", timeDifference.toString());
-            courier.updateData(responseCourierData, ordersUnassigned); // add here check if a driver wants to apply new order
+            courier.updateData(responseCourierData, ordersUnassigned); // todo add here check if a driver wants to apply new order
 
             if (courier.getCurrentCoordinate() != null) {
                 routeToDestination = RequestHelper.requestRouteByCoordinates(courier.getCurrentCoordinate(), courier.getDestinationCoordinate(), courier.getOrders());
@@ -167,17 +169,6 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Void> {//<Stri
         }
 
         return new ArrayList<>();
-    }
-
-    private void mapDtoFromServer(String responseInfo) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Infos infos = objectMapper.readValue(responseInfo, Infos.class);
-
-            String address = infos.getInfos().get(0).getAddress();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
     }
 
     public void onetimeTimer(Context context) {

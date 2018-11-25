@@ -1,7 +1,8 @@
 package com.example.hello.maps1.entities.responses;
 
-import com.example.hello.maps1.entities.Info;
+import com.example.hello.maps1.entities.Order;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -11,14 +12,16 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Infos {
-    private List<Info> infos;
 
-    public List<Info> getInfos() {
-        return infos;
+    @JsonProperty("orders")
+    private List<Order> orders;
+
+    public List<Order> getOrders() {
+        return orders;
     }
 
-    public void setInfos(List<Info> infos) {
-        this.infos = infos;
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
     }
 }
 /*

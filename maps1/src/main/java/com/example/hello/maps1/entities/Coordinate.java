@@ -19,10 +19,10 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Coordinate implements Serializable {
 
-    @JsonProperty("latitude")
+    @JsonProperty("lat")
     private Double lat;
 
-    @JsonProperty("longitude")
+    @JsonProperty("lng")
     private Double lng;
 
     public Coordinate(){

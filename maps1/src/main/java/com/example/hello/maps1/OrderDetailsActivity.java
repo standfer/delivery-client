@@ -128,6 +128,7 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         map.setInfoWindowAdapter(new InfoWindowAdapterImpl(getLayoutInflater()));
+        map.setMyLocationEnabled(true);
         if (order == null || order.getLocation() == null || courier == null || courier.getCurrentCoordinate() == null) return;
 
         OrderDetailsRouteBuilder orderDetailsRouteBuilder = new OrderDetailsRouteBuilder();

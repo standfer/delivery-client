@@ -7,8 +7,12 @@ import com.example.hello.maps1.NetworkDAO;
 import com.example.hello.maps1.activities.alerts.AlertDialogFragment;
 import com.example.hello.maps1.asyncEngines.OrdersAssignment;
 import com.example.hello.maps1.constants.Constants;
+import com.example.hello.maps1.entities.responses.Infos;
 import com.example.hello.maps1.helpers.CollectionsHelper;
+import com.example.hello.maps1.helpers.JSONHelper;
 import com.example.hello.maps1.helpers.NotificationHelper;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +28,7 @@ import java.util.Map;
 /**
  * Created by ivan_grinenko on 23.08.2016.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Courier implements Serializable {
     private int id;
     private String name;
@@ -44,7 +49,10 @@ public class Courier implements Serializable {
     private Coordinate manualCurrentCoordinate;
 
     private Order order;
+
+    @JsonProperty("orders")
     private List<Order> orders;
+
     private List<Order> ordersAvailable;
     private List<Order> ordersToAssign;
 
@@ -220,7 +228,13 @@ public class Courier implements Serializable {
     }
 
     public void updateData(String responseOrdersAssigned, List<Order> ordersUnassigned) {
-        initOrdersFromJsonArray(responseOrdersAssigned);
+        //initOrdersFromJsonArray(responseOrdersAssigned);
+        Infos infos = (Infos) JSONHelper.getObjectFromJson(responseOrdersAssigned, Infos.class);
+
+        if (infos != null) {
+            this.orders = infos.getOrders();
+        }
+
         this.ordersAvailable = findOrdersToAssign(ordersUnassigned);
     }
 

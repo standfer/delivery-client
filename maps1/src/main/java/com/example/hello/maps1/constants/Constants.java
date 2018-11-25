@@ -5,7 +5,7 @@ package com.example.hello.maps1.constants;
  */
 
 public interface Constants {
-    String SERVER_ADDRESS = "http://192.168.1.40/delivery/helpers/helper.php";// "http://192.168.43.4/delivery/helpers/helper.php";//"http://192.168.1.34/delivery/helpers/helper.php";
+    String SERVER_ADDRESS = "http://192.168.1.36/delivery/helpers/helper.php"; //"http://192.168.0.102/delivery/helpers/helper.php";// "http://192.168.43.4/delivery/helpers/helper.php";//"http://192.168.1.34/delivery/helpers/helper.php";
     String MSG_ORDER_PROBLEMS = "Внимание! Уведомление о проблемах с заказом отправлено оператору";
     String MSG_CALL_FORBIDDEN = "Call forbidden";
 
@@ -23,4 +23,10 @@ public interface Constants {
     String TAG_MAPS_NAME = "map";
 
     String PHONE_NUMBER_OPERATOR = "1234";
+
+    Integer MAP_PADDING_TOP_HALF_SCREEN = 578;
+    Integer MAP_PADDING_TOP_FULL_SCREEN = 950;
+
+    //SERVER METHODS
+    String METHOD_NAME_updateCourierLocation = "updateDTOCourierLocation";
 }

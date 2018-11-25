@@ -19,9 +19,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.hello.maps1.constants.Constants;
@@ -69,8 +73,10 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
     //GUI
     private Button btnHelp, btnCall, btnManualMove, btnMoveToNextOrder, btnLogout;
     private Button btnOrder1, btnOrder2, btnOrder3, btnOrder4;
+    private ImageButton btnFullScreen;
 
-    LinearLayout layoutHorizontal;
+    private LinearLayout layoutHorizontal;
+    private RelativeLayout layoutMap;
     private AutoCompleteTextView autoComplFrom, autoComplTo;
 
     private TimeNotification timeNotification;
@@ -88,6 +94,7 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
         btnHelp = (Button) findViewById(R.id.btnHelp);
         btnLogout = (Button) findViewById(R.id.btnLogout);
         btnManualMove = (Button) findViewById(R.id.btnManualMove);
+        btnFullScreen = (ImageButton) findViewById(R.id.btnFullScreen);
         //btnMoveToNextOrder = (Button) findViewById(R.id.btnMoveToNextOrder);
 
         btnOrder1 = (Button) findViewById(R.id.btnOrder1);
@@ -97,6 +104,8 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
 
         layoutHorizontal = (LinearLayout) findViewById(R.id.layoutHorizontal);
         layoutHorizontal.setVisibility(View.VISIBLE);
+
+        layoutMap = (RelativeLayout) findViewById(R.id.layoutMap);
 
         initGUIListeners();
     }
@@ -173,6 +182,50 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
             public void onClick(View v) {
                 //setContentView(R.layout.activity_login);
                 ActivityHelper.changeActivity(getApplicationContext(), mainMapsActivity, LoginActivity.class, 0);
+            }
+        });
+
+        btnFullScreen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) layoutMap.getLayoutParams();
+                float mapNewWeight; //= layoutParams.weight == 100 ? 1 : 100;
+                int paddingTop;
+
+                if (layoutParams.weight == 100) {
+                    mapNewWeight = 1;
+                    paddingTop = Constants.MAP_PADDING_TOP_FULL_SCREEN;
+                } else {
+                    mapNewWeight = 100;
+                    paddingTop = Constants.MAP_PADDING_TOP_HALF_SCREEN;
+                }
+
+                LinearLayout.LayoutParams mapNewLayoutParams = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        mapNewWeight
+                );
+
+                layoutMap.setLayoutParams(mapNewLayoutParams);
+
+                mMap.setPadding(0, paddingTop, 70, 0);
+            }
+        });
+
+        layoutMap.setLayoutAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mMap.setPadding(0, btnFullScreen.getTop(), 70, 0);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
             }
         });
 
@@ -447,7 +500,7 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
     public void onMapReady(GoogleMap googleMap) {
         setmMap(googleMap);
         setMrkCurrentPos(getmMap().addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Моё Текущее положение").visible(false)));
-        mMap.setPadding(0, 600, 70, 0);
+        mMap.setPadding(0, Constants.MAP_PADDING_TOP_HALF_SCREEN, 70, 0);
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMapToolbarEnabled(true);
 

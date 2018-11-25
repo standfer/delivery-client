@@ -5,14 +5,35 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        tools:context=".MainMapsActivity"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/layoutMap"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="100"
-        map:uiZoomControls="false"/>
+        android:layout_weight="100">
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            tools:context=".MainMapsActivity"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            map:uiZoomControls="false"/>
+
+        <ImageButton
+            android:id="@+id/btnFullScreen"
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="@android:color/transparent"
+            android:checked="false"
+            android:src="@drawable/btn_full_screen2"
+            android:onClick="onClickBtnFullScreen"
+            android:visibility="visible"></ImageButton>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/layoutHorizontal"
