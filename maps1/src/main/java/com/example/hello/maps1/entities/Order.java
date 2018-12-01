@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import com.example.hello.maps1.entities.adapters.DateTimeAdapter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -15,6 +14,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Ivan on 12.03.2017.
@@ -55,6 +55,8 @@ public class Order implements Comparable<Order>, Serializable {
 
     @JsonProperty("client")
     private Client client;
+
+    private List<ProductInOrder> productsInOrder;
 
     public Order(){}
 
@@ -217,5 +219,13 @@ public class Order implements Comparable<Order>, Serializable {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public List<ProductInOrder> getProductsInOrder() {
+        return productsInOrder;
+    }
+
+    public void setProductsInOrder(List<ProductInOrder> productsInOrder) {
+        this.productsInOrder = productsInOrder;
     }
 }
