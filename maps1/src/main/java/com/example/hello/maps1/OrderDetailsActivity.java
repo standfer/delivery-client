@@ -2,45 +2,44 @@ package com.example.hello.maps1;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.hello.maps1.asyncEngines.async_activities.OrderDetailsRouteBuilder;
-import com.example.hello.maps1.asyncEngines.impl.AsyncExecutorImpl;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Client;
-import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
-import com.example.hello.maps1.entities.Route;
+import com.example.hello.maps1.entities.ProductInOrder;
+import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
-import com.example.hello.maps1.requestEngines.RequestHelper;
-import com.example.hello.maps1.requestEngines.RouteHelper;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
 
 
 /**
  * Created by Ivan on 21.08.2017.
  */
 
-public class OrderDetailsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class OrderDetailsActivity extends FragmentActivity implements OnMapReadyCallback {//todo change ui and check how dynamically add tableRow and show it
 
     private OrderDetailsActivity orderDetailsActivity;
     private GoogleMap map;
-    private Button btnBack, btnCallClient, btnCallOperator;
+    private Button btnBack, btnCallClient, btnCallOperator, btnOrderDetails;
+    private TableLayout tableOrderDetails;
+    private TableRow trOdd, trProductTitle;
+
     private TextView tvCourierNumber, tvClientName, tvOrderNumber, tvOddMoneyFrom, tvOrderAddressTitle, tvOrderAddress,
             tvOrderApproveTimeTitle, tvOrderApproveTime, tvOrderCost, tvOrderDeliveryTimeTitle,
-            tvOrderDeliveryTime, tvOrderInfo, tvNotes;
+            tvOrderDeliveryTime, tvNotes,
+            tvOrderOddTitle, tvOrderOdd,
+            tvOrderProductTitle, tvOrderProductQuantity, tvOrderProductPrice
+    ;
 
     private Courier courier;
     private Order order;
@@ -94,6 +93,11 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
         btnCallClient = (Button) findViewById(R.id.btnCallClient);
         btnCallOperator = (Button) findViewById(R.id.btnCallOperator);
         btnBack = (Button) findViewById(R.id.btnBack);
+        btnOrderDetails = (Button) findViewById(R.id.btnOrderDetails);
+
+        tableOrderDetails = (TableLayout) findViewById(R.id.tableOrderDetails);
+        trOdd = (TableRow) findViewById(R.id.trOdd);
+        trProductTitle = (TableRow) findViewById(R.id.trProductTitle);
 
         tvCourierNumber = (TextView) findViewById(R.id.tvCourierNumber);
         tvClientName = (TextView) findViewById(R.id.tvClientName);
@@ -103,8 +107,11 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
         tvOrderApproveTime = (TextView) findViewById(R.id.tvOrderApproveTime);
         tvOrderDeliveryTime = (TextView) findViewById(R.id.tvOrderDeliveryTime);
         tvOrderCost = (TextView) findViewById(R.id.tvOrderCost);
-        tvOrderInfo = (TextView) findViewById(R.id.tvOrderInfo);
         tvNotes = (TextView) findViewById(R.id.tvNotes);
+
+        tvOrderOdd = (TextView) findViewById(R.id.tvOrderOdd);
+        tvOrderProductQuantity = (TextView) findViewById(R.id.tvOrderProductQuantity);
+        tvOrderProductPrice = (TextView) findViewById(R.id.tvOrderProductPrice);
 
         initGUIListeners();
     }
@@ -119,9 +126,44 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
 
         if (client != null) {
             btnCallClient.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), client.getPhone()));
+
+            btnOrderDetails.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    changeOrderDetailsVisibility();
+                    if (order == null || CollectionsHelper.isEmpty(order.getProductsInOrder())) return;
+
+                    tvOrderOdd.setText(order.getOdd() + "");
+                    for (ProductInOrder productInOrder : order.getProductsInOrder()) {
+                        TextView productName = new TextView(getApplicationContext());
+                        TextView productQuantity = new TextView(getApplicationContext());
+                        TextView productPrice = new TextView(getApplicationContext());
+
+                        productName.setText(productInOrder.getProduct().getName());
+                        productQuantity.setText(productInOrder.getQuantity() + "");
+                        productPrice.setText(productInOrder.getProduct().getPrice() + "");
+
+                        trProductTitle.addView(productName);
+                        trProductTitle.addView(productQuantity);
+                        trProductTitle.addView(productPrice);
+                    }
+                }
+            });
         }
 
         btnCallOperator.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
+    }
+
+    private void changeOrderDetailsVisibility() {
+        int visibility = View.GONE == trProductTitle.getVisibility() ? View.VISIBLE : View.GONE;
+        trOdd.setVisibility(visibility);
+        trProductTitle.setVisibility(visibility);
+
+        changeMapVisibility(visibility == View.VISIBLE);//todo add hiding map
+    }
+
+    private void changeMapVisibility(boolean isVisible) {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
     }
 
     @Override

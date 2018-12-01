@@ -91,6 +91,7 @@
 
 
     <TableLayout
+        android:id="@+id/tableOrderDetails"
         android:orientation="vertical"
         android:layout_gravity="center_horizontal"
         android:layout_width="match_parent"
@@ -130,7 +131,7 @@
             <TextView
                 android:id="@+id/tvOrderDeliveryTimeTitle"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="7"
                 android:ems="10"
                 android:text="Доставить к"
@@ -142,24 +143,74 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="10"
                 android:ems="10"
-                android:textSize="18sp"
-                android:text="23:22" />
+                android:text="23:22"
+                android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/tvOrderInfo"
+            <Button
+                android:id="@+id/btnOrderDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="10"
+                android:layout_weight="6"
+                android:text="Подробно"
+                android:textSize="18sp"/>
+        </TableRow>
+        <TableRow
+            android:id="@+id/trOdd"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/tvOrderOddTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="7"
                 android:ems="10"
-                android:textSize="18sp"
-                android:text="Заказ" />
+                android:text="Скидка"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvOrderOdd"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="7"
+                android:ems="10"
+                android:text="0"
+                android:textSize="18sp" />
+        </TableRow>
+        <TableRow
+            android:id="@+id/trProductTitle"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/tvOrderProductTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="7"
+                android:ems="10"
+                android:text="Продукты"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvOrderProductQuantity"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="7"
+                android:ems="10"
+                android:text="Кол-во"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvOrderProductPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="7"
+                android:ems="10"
+                android:text="Стоимость"
+                android:textSize="18sp" />
         </TableRow>
     </TableLayout>
 
     <TextView
         android:id="@+id/tvNotes"
         android:layout_width="match_parent"
-        android:layout_height="65dp"
+        android:layout_height="74dp"
         android:ems="10"
         android:text="Test notes"
         android:textSize="18sp" />
