@@ -86,7 +86,7 @@ public class TrackingService extends Service {
             @Override
             public void run() {
                 try {
-                    //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener);
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener);
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
                 } catch (SecurityException ex) {
                     ToolsHelper.logException(ex);
