@@ -1,6 +1,8 @@
 package com.example.hello.maps1.services;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -55,19 +57,21 @@ public class TrackingService extends Service {
     }
 
     private void createIfAndroidOreoNotification(Notification notification, PendingIntent pendingIntent) {
-        if(Build.VERSION.SDK_INT>=26) {
-            /*NotificationChannel channel = new NotificationChannel(NOTIFICATION_Service_CHANNEL_ID,
-                    "Sync Service", NotificationManager.IMPORTANCE_HIGH);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    Constants.SERVICE_NOTIFICATION_CHANNEL_ID,
+                    TrackingService.class.getName(),
+                    NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription(TrackingService.class.getName());
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(channel);
 
-            notification = new Notification.Builder(this,NOTIFICATION_Service_CHANNEL_ID)
+            notification = new Notification.Builder(this, Constants.SERVICE_NOTIFICATION_CHANNEL_ID)
                     .setContentTitle(Constants.SERVICE_NOTIFICATION_TITLE)
                     .setContentText(Constants.SERVICE_NOTIFICATION_TEXT)
                     .setSmallIcon(Constants.SERVICE_NOTIFICATION_ICON)
                     .setContentIntent(pendingIntent)
-                    .build();*/
+                    .build();
         }
     }
 

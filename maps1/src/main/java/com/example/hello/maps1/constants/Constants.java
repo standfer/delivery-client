@@ -45,6 +45,7 @@ public interface Constants {
     Long TIMEOUT_COURIER_ASSIGNMENT = 30000L;
     double PROXIMITY_ALERT_RADIUS = 300;
     int ONGOING_NOTIFICATION_ID = 121;
+    String SERVICE_NOTIFICATION_CHANNEL_ID = "TrackingService_" + ONGOING_NOTIFICATION_ID;
     int SERVICE_NOTIFICATION_ICON = R.drawable.ic_cast_light;
     String SERVICE_NOTIFICATION_TITLE = "Доставка";
     String SERVICE_NOTIFICATION_TEXT = "Приложение запущено";
