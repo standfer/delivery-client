@@ -1,6 +1,7 @@
 package com.example.hello.maps1.entities.responses;
 
 import com.example.hello.maps1.entities.Order;
+import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -22,6 +23,10 @@ public class Infos {
 
     public void setOrders(List<Order> orders) {
         this.orders = orders;
+    }
+
+    public boolean isEmpty() {
+        return CollectionsHelper.isEmpty(orders);
     }
 }
 /*

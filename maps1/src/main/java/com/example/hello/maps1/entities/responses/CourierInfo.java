@@ -23,13 +23,13 @@ public class CourierInfo {
         this.id = id;
         this.ordersToAssign = ordersToAssign;
 
-        if (!CollectionsHelper.isEmpty(this.ordersToAssign)) {
+        /*if (!CollectionsHelper.isEmpty(this.ordersToAssign)) {
             for (Order order : ordersToAssign) {
                 if (order.getWorkPlace() != null) {
                     order.getWorkPlace().setAddress("");
                 }
             }
-        }
+        }*/
     }
 
     public int getId() {

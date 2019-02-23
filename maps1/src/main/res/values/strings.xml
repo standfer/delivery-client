@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Maps1</string>
     <string name="title_activity_main_maps">Доставка</string>
-    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_login">Доставка</string>
     <string name="title_activity_rules">Правила</string>
     <string name="title_activity_schedule">График</string>
     <string name="title_activity_statistics">Статистика</string>
@@ -21,4 +21,6 @@
 2.3.       Число участников Общества не должно быть более пятидесяти. Если число участников превысит установленный предел, Общество подлежит преобразованию в акционерное общество в течение одного года.
 2.4.       Общество обеспечивает в соответствии с требованиями Закона ведение и хранение списка участников Общества с указанием сведений о каждом участнике Общества, размере его доли в уставном капитале Общества и ее оплате, а также о размере долей, принадлежащих Обществу, датах их перехода к Обществу или приобретения Обществом.
     </string>
+
+    <string name="toast_unhandled_ex">Ошибка программы</string>
 </resources>

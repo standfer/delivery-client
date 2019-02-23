@@ -4,7 +4,7 @@ package com.example.hello.maps1.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Client extends BaseEntity {
+public class Client extends BaseEntity implements Cloneable {
 
     private String name;
     private String phone;
@@ -31,5 +31,10 @@ public class Client extends BaseEntity {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

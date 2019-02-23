@@ -36,11 +36,14 @@ public class OrderDetailsRouteBuilder extends AsyncTask<OrderDetailsActivity, Vo
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
 
-        map.addPolyline(polylineOptions);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()), 10));
+        if (polylineOptions != null) {
 
-        RouteHelper.addMarkersByCoordinates(map, Arrays.asList(
-                new Pair<>(courier.getCurrentCoordinate(), "Вы здесь"),
-                new Pair<>(order.getLocation(), String.format("Доставить по адресу:%s", order.getAddress()))));
+            map.addPolyline(polylineOptions);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()), 10));
+
+            RouteHelper.addMarkersByCoordinates(map, Arrays.asList(
+                    new Pair<>(courier.getCurrentCoordinate(), "Вы здесь"),
+                    new Pair<>(order.getLocation(), String.format("Доставить по адресу:%s", order.getAddress()))));
+        }
     }
 }

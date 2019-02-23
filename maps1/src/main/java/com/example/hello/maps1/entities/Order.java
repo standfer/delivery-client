@@ -5,6 +5,7 @@ package com.example.hello.maps1.entities;
 import android.support.annotation.NonNull;
 
 import com.example.hello.maps1.entities.adapters.DateTimeAdapter;
+import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -21,9 +24,8 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Order implements Comparable<Order>, Serializable {
-
-    private int id;
+public class Order extends BaseEntity
+        implements Comparable<Order>, Serializable, Cloneable {
 
     private String address;
     private String phoneNumber;
@@ -45,7 +47,7 @@ public class Order implements Comparable<Order>, Serializable {
     @JsonSerialize(using = DateTimeAdapter.Serializer.class)
     private DateTime deliverTs;
 
-    private boolean isAppotinted;
+    private boolean isAssigned;
 
     @JsonProperty("location")
     private Coordinate location;
@@ -58,7 +60,8 @@ public class Order implements Comparable<Order>, Serializable {
 
     private List<ProductInOrder> productsInOrder;
 
-    public Order(){}
+    public Order() {
+    }
 
     public Order(String address, String phoneNumber, double cost, boolean isDelivered) {
         this.address = address;
@@ -71,7 +74,7 @@ public class Order implements Comparable<Order>, Serializable {
                  String phoneNumber, double cost, int isDelivered,
                  int idWorkPlace, String addressWorkPlace, double latWorkPlace, double lngWorkPlace, int priority,
                  double odd, String notes, int idClient, String clientName, String clientPhone) {
-        this.id = id;
+        super.setId(id);
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.cost = cost;
@@ -121,11 +124,18 @@ public class Order implements Comparable<Order>, Serializable {
     }
 
     public String toString() {
-        return String.format("%s\n%s\n%s\n%s\n",
+        return String.format(
+                "Order %s\n" +
+                "Address: %s\n" +
+                "Phone: %s\n" +
+                "Cost: %s\n",
+                this.getId(), this.getAddress(), this.getPhoneNumber(), this.getCost());
+
+        /*return String.format("%s\n%s\n%s\n%s\n",
                 this.address,
                 this.phoneNumber,
                 this.cost,
-                this.isDelivered);
+                this.isDelivered);*/
     }
 
     public Coordinate getLocation() {
@@ -144,12 +154,12 @@ public class Order implements Comparable<Order>, Serializable {
         this.workPlace = workPlace;
     }
 
-    public boolean isAppotinted() {
-        return isAppotinted;
+    public boolean isAssigned() {
+        return isAssigned;
     }
 
-    public void setAppotinted(boolean appotinted) {
-        isAppotinted = appotinted;
+    public void setAssigned(boolean assigned) {
+        isAssigned = assigned;
     }
 
     public DateTime getCreateTs() {
@@ -168,20 +178,12 @@ public class Order implements Comparable<Order>, Serializable {
         this.deliverTs = deliverTs;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getData() {
         return String.format(
                 "Order %s\n" +
-                "Address: %s\n" +
-                "Phone: %s\n" +
-                "Cost: %s\n", this.getId(), this.getAddress(), this.getPhoneNumber(), this.getCost());
+                        "Address: %s\n" +
+                        "Phone: %s\n" +
+                        "Cost: %s\n", this.getId(), this.getAddress(), this.getPhoneNumber(), this.getCost());
     }
 
     public int getPriority() {
@@ -195,6 +197,19 @@ public class Order implements Comparable<Order>, Serializable {
     @Override
     public int compareTo(@NonNull Order another) {
         return this.getPriority() < another.getPriority() ? -1 : (this.getPriority() == another.getPriority() ? 0 : 1);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Order orderCloned = (Order) super.clone();
+
+        if (location != null) orderCloned.setLocation((Coordinate) location.clone());
+        if (workPlace != null) orderCloned.setWorkPlace((WorkPlace) workPlace.clone());
+        if (client != null) orderCloned.setClient((Client) client.clone());
+
+        orderCloned.setProductsInOrder((List<ProductInOrder>) CollectionsHelper.getCollectionCloned(productsInOrder));
+
+        return orderCloned;
     }
 
     public Client getClient() {

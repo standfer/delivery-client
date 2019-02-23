@@ -9,8 +9,8 @@ import java.io.Serializable;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProductInOrder implements Serializable {
-    private int id;
+public class ProductInOrder extends BaseEntity
+        implements Serializable, Cloneable {
     private Order order;
     private Product product;
 
@@ -22,14 +22,6 @@ public class ProductInOrder implements Serializable {
 
     public void setProduct(Product product) {
         this.product = product;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public Order getOrder() {
@@ -46,5 +38,20 @@ public class ProductInOrder implements Serializable {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        ProductInOrder productInOrderCloned = (ProductInOrder) super.clone();
+
+        if (order != null) {
+            productInOrderCloned.setOrder((Order) order.clone());
+        }
+
+        if (product != null) {
+            productInOrderCloned.setProduct((Product) product.clone());
+        }
+
+        return super.clone();
     }
 }

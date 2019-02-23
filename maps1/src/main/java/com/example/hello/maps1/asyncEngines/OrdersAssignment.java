@@ -27,11 +27,13 @@ public class OrdersAssignment extends AsyncTask<MainMapsActivity, Void, Void> {
             Courier courier = mainMapsActivity.getCourier();
             CourierInfo courierInfo = new CourierInfo(courier.getId(), courier.getOrdersToAssign());
 
-            String courierInJson = JSONHelper.getJsonFromObject(courierInfo);
+            String courierInJson = RequestHelper.convertObjectToJson(courier); //JSONHelper.getJsonFromObject(courier);
 
             String ordersAssignRequest =
-                    RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, "action=assignOrdersToCourier&courier=" + courierInJson);
+                    RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS,
+                            String.format("action=%s&courier=%s", Constants.METHOD_NAME_assignOrdersToCourier, courierInJson));
 
+            courier.clearAssignment(); //todo check if response successful and clear
 
         } catch (Throwable e) {
             Log.d("Order assign error", e.getStackTrace().toString());

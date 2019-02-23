@@ -8,6 +8,7 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.ACTION_CALL" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -18,6 +19,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:persistent="true"
         android:theme="@style/AppTheme" >
 
         <!--
@@ -32,21 +34,37 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA" />
 
+        <service
+            android:name="com.example.hello.maps1.services.TrackingService"
+            android:enabled="true" >
+        </service>
+
+        <service
+            android:name="com.example.hello.maps1.services.restarters.ForegroundService"
+            android:enabled="true" >
+        </service>
+
+        <receiver
+            android:name="com.example.hello.maps1.services.restarters.TrackingRestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped">
+        </receiver>
+
         <activity
             android:name=".MainMapsActivity"
             android:launchMode="singleTop"
+            android:persistent="true"
             android:label="@string/title_activity_main_maps" >
-
-
         </activity>
 
         <activity
             android:name=".LoginActivity"
             android:launchMode="singleTop"
+            android:persistent="true"
             android:label="@string/title_activity_login" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -55,8 +73,6 @@
             android:launchMode="singleTop"
             android:label="@string/title_activity_rules" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -65,8 +81,6 @@
             android:launchMode="singleTop"
             android:label="@string/title_activity_schedule" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -75,8 +89,6 @@
             android:launchMode="singleTop"
             android:label="@string/title_activity_statistics" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -86,8 +98,6 @@
             android:launchMode="singleTop"
             android:label="@string/title_activity_settings" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -97,8 +107,6 @@
             android:launchMode="singleTop"
             android:label="@string/title_activity_order_details" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -36,10 +36,13 @@ public class RouteHelper {
     }
 
     public static PolylineOptions getRoutePolyline(Coordinate origin, Coordinate destination) {
-        String routeToDestination = RequestHelper.requestRouteByCoordinates(origin, destination);
-        List<Coordinate> routePoints = MyIntentService.pointsCoordinates(routeToDestination);
+        PolylineOptions routeLine = null;
+        if (origin != null) {
+            String routeToDestination = RequestHelper.requestRouteByCoordinates(origin, destination);
+            List<Coordinate> routePoints = MyIntentService.pointsCoordinates(routeToDestination);
 
-        PolylineOptions routeLine = RouteHelper.getRoutePolyline(routePoints);
+            routeLine = RouteHelper.getRoutePolyline(routePoints);
+        }
 
         return  routeLine;
     }

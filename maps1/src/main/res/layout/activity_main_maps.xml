@@ -188,7 +188,7 @@
             android:background="@android:color/holo_orange_light"
             android:checked="false"
             android:onClick="onClickBtnCall"
-            android:text="Позвонить оператору"
+            android:text="Позвонить диспетчеру"
             android:visibility="visible"></Button>
     </RelativeLayout>
 

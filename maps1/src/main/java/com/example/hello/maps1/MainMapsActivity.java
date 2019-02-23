@@ -1,19 +1,14 @@
 package com.example.hello.maps1;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -21,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -32,23 +26,27 @@ import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
-import com.example.hello.maps1.gui.dialogs.OrdersDialog;
 import com.example.hello.maps1.helpers.ActivityHelper;
 import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
-import com.example.hello.maps1.listeners.BtnCallListener;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
+import com.example.hello.maps1.services.TrackingService;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.nullwire.trace.ExceptionHandler;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity implements OnMapReadyCallback {
+    protected Intent trackingIntent;
 
     private GoogleMap mMap;
     public static Marker mrkCurrentPos;
@@ -66,9 +64,7 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
     private double coordinateCounter = 0.001;
     private int orderCounter = 0;
 
-    //private String serverAddress = "http://185.26.113.131/ilkato/helper.php";//"http://192.168.1.5";// "http://192.168.43.185";//
-    //private String serverAddress = "http://192.168.43.185";//
-    //private String serverAddress = "http://192.168.1.36/delivery/helpers/helper.php";//
+    private boolean timerActive;
 
     //GUI
     private Button btnHelp, btnCall, btnManualMove, btnMoveToNextOrder, btnLogout;
@@ -77,25 +73,17 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
 
     private LinearLayout layoutHorizontal;
     private RelativeLayout layoutMap;
-    private AutoCompleteTextView autoComplFrom, autoComplTo;
 
     private TimeNotification timeNotification;
 
-    //поля для хранения GPS
     private LocationManager locationManager;
-    StringBuilder sbGPS = new StringBuilder();
-    StringBuilder sbNet = new StringBuilder();
 
     private void initGUI() {
-        //autoComplFrom = (AutoCompleteTextView) findViewById(R.id.autoComplFrom);
-        //autoComplTo = (AutoCompleteTextView) findViewById(R.id.autoComplTo);
-
         btnCall = (Button) findViewById(R.id.btnCall);
         btnHelp = (Button) findViewById(R.id.btnHelp);
         btnLogout = (Button) findViewById(R.id.btnLogout);
         btnManualMove = (Button) findViewById(R.id.btnManualMove);
         btnFullScreen = (ImageButton) findViewById(R.id.btnFullScreen);
-        //btnMoveToNextOrder = (Button) findViewById(R.id.btnMoveToNextOrder);
 
         btnOrder1 = (Button) findViewById(R.id.btnOrder1);
         btnOrder2 = (Button) findViewById(R.id.btnOrder2);
@@ -108,6 +96,8 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
         layoutMap = (RelativeLayout) findViewById(R.id.layoutMap);
 
         initGUIListeners();
+        initPermissions();//todo check everywhere onRequestPermissionsResult - in case user change permissions while program works
+        //initTimer();
     }
 
     private void initGUIListeners() {
@@ -125,35 +115,8 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
                     coordinateCounter += 0.001;
                     courier.requestDataFromServer(mainMapsActivity);
                 }
-                //Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("3301214"));
-                //startActivity(intent);
-                //StandardIntentsHelper.callPhoneIntent(mainMapsActivity, "3301214");
             }
         });
-
-        /*btnMoveToNextOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("Location", String.format("Courier coordinates changed to next order"));
-                if (courier != null && courier.getCurrentCoordinate() != null && !CollectionsHelper.isEmpty(courier.getOrders())) {
-                    List<Order> orders = courier.getOrders();
-                    Order orderToMove = orders.get(0);
-                    if (orders.size() > orderCounter) {
-                        orderToMove = orders.get(orderCounter++);
-                    } else {
-                        orderCounter = 0;
-                    }
-
-                    Coordinate nextCoordinate = new Coordinate(orderToMove.getLocation().getLat(), orderToMove.getLocation().getLng());
-
-                    courier.setCurrentCoordinate(nextCoordinate);
-                    courier.requestDataFromServer(mainMapsActivity);
-                }
-                //Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("3301214"));
-                //startActivity(intent);
-                //StandardIntentsHelper.callPhoneIntent(mainMapsActivity, "3301214");
-            }
-        });*/
 
         btnCall.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
 
@@ -161,26 +124,12 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
             @Override
             public void onClick(View v) {
                 ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
-                try {
-                    /*Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("3301214"));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);*/
-                    //StandardIntentsHelper.callPhoneIntent(mainMapsActivity, "3301214");
-                }
-                catch (SecurityException ex) {
-                    ToolsHelper.showMsgToUser(Constants.MSG_CALL_FORBIDDEN, toast);
-                }
-                /*Intent callIntent = new Intent(Intent.ACTION_CALL);
-                callIntent.setData(Uri.parse(phone_no));
-                callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(callIntent);*/
             }
         });
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //setContentView(R.layout.activity_login);
                 ActivityHelper.changeActivity(getApplicationContext(), mainMapsActivity, LoginActivity.class, 0);
             }
         });
@@ -215,25 +164,54 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
         layoutMap.setLayoutAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                mMap.setPadding(0, btnFullScreen.getTop(), 70, 0);
+                try {
+                    mMap.setPadding(0, btnFullScreen.getTop(), 70, 0);
+                } catch (Throwable ex) {
+                    ToolsHelper.logException(ex);
+                }
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-
             }
         });
 
     }
 
+    private void initPermissions() {
+        int permissionLocationStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permissionCallPhoneStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permissionInternetStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permissionWakeLockStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (permissionLocationStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionCallPhoneStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionInternetStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionWakeLockStatus != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            ActivityCompat.requestPermissions(this, new String[]
+                    {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.CALL_PHONE,
+                            Manifest.permission.INTERNET,
+                            Manifest.permission.WAKE_LOCK
+
+                    }, Constants.REQUEST_CODE_PERMISSION_ALL);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        try {
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+        } catch (Throwable ex) {
+            ToolsHelper.logException(ex);
+        }
         return true;
     }
 
@@ -260,180 +238,214 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
                 return true;
             case R.id.action_exit:
                 ActivityHelper.changeActivity(getApplicationContext(), mainMapsActivity, LoginActivity.class, 0);
+                ActivityHelper.stopRunningService(this, TrackingService.class);
                 return true;
-            default:return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
 
-        this.mainMapsActivity = this;
-        isRouteNeed = true;
-        setContentView(R.layout.activity_main_maps);
+            this.mainMapsActivity = this;
+            isRouteNeed = true;
+            setContentView(R.layout.activity_main_maps);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.setHasOptionsMenu(true);
-        /*if (savedInstanceState != null) {
-            mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        } else {
-            mapFragment = SupportMapFragment.newInstance();
-            FragmentTransaction mapTransaction = getSupportFragmentManager().beginTransaction();
-            mapTransaction.addToBackStack(Constants.TAG_MAPS_NAME).add(R.id.map, mapFragment, Constants.TAG_MAPS_NAME).commit();
-        }*/
-        mapFragment.getMapAsync(this);
+            // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.setHasOptionsMenu(true);
+            mapFragment.getMapAsync(this);
+
+            initGUI();
+
+            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
+
+            idCourier = getIntent().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
+            courier = new Courier(idCourier, "Vasya", 1);
 
 
+            //ActivityHelper.startTrackingService(this, courier);
+            ActivityHelper.startService(this, courier, TrackingService.class);
 
+            /*trackingIntent = new Intent(getApplicationContext(), TrackingService.class);
+            ActivityHelper.putToIntent(trackingIntent, (Object) courier);
 
-        //ActivityHelper.addActivityToBackStack(savedInstanceState, mapFragment, getSupportFragmentManager(), this, R.id.map, "map");
-        //timeNotification = new TimeNotification();
+            if (!isMyServiceRunning(TrackingService.class)) {
+                NotificationHelper.showNotification(this, "Доставка", "Приложение работает", trackingIntent);
+                startService(trackingIntent);
+            }*/
 
-        initGUI();//создание кнопок и вешание listeners
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
-
-        idCourier = getIntent ().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
-        courier = new Courier(idCourier, "Vasya", 1);
-
-        /*Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    if (courier != null && courier.getCurrentCoordinate() != null) {
-                        courier.requestDataFromServer(mainMapsActivity);
-                        Log.d("Request", String.format("Current coordinate (%s) has sent", courier.getCurrentCoordinate()));
+            /*Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        if (courier != null && courier.getCurrentCoordinate() != null) {
+                            courier.requestDataFromServer(mainMapsActivity);
+                            Log.d("Request", String.format("Current coordinate (%s) has sent", courier.getCurrentCoordinate()));
+                        }
+                    } catch(Throwable ex) {
+                        Log.d("Request", ex.getStackTrace().toString());
                     }
-                } catch(Throwable ex) {
-                    Log.d("Request", ex.getStackTrace().toString());
                 }
-            }
-        }, 1000, 15000);*/
+            }, 1000, 15000);*/
+        } catch (Throwable ex) {
+            ToolsHelper.logException(ex);
+        }
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
-            checkEnabled();
+        if (Constants.IS_UI_REFRESH_ENABLED) {
+            try {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
 
-        } catch (SecurityException ex) {
-            ex.printStackTrace();
+                checkEnabled();
+
+            } catch (SecurityException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     @Override
     protected void onPause() throws SecurityException {
         super.onPause();
-        //locationManager.removeUpdates(locationListener);
+        if (locationManager != null) locationManager.removeUpdates(locationListener);
     }
 
-    public void showOrdersDialog() {
-        FragmentManager fm = getSupportFragmentManager();
-        OrdersDialog dialog = new OrdersDialog();
-        dialog.show(fm, "my_tag");
-    }
+    public synchronized void updateGui(final Courier courier) {
+        try {
+            ToolsHelper.logOrders(MainMapsActivity.class, "updateGui", courier.getOrders(), courier.getOrdersAvailable());
+            Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "updateGui"), String.format("courier.orders:%s, courier.ordersAvailable:%s",
+                    !CollectionsHelper.isEmpty(courier.getOrders()) ? courier.getOrders().size() : null,
+                    !CollectionsHelper.isEmpty(courier.getOrdersAvailable()) ? courier.getOrdersAvailable().size() : null));
 
-    public void updateGui(final Courier courier) {
-        if (courier == null || CollectionsHelper.isEmpty(courier.getOrders())) return;
-        List<Order> orders = courier.getOrders();
+            if (courier == null || CollectionsHelper.isEmpty(courier.getOrders())) return;
+            List<Order> orders = courier.getOrders();
 
-        int countOrders = Math.min(4, orders.size());
+            int countOrders = Math.min(4, orders.size());
 
-        for (int i = 0; i < countOrders; i++) {
-            final Order order = orders.get(i);
+            for (int i = 0; i < countOrders; i++) {
+                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "updateGui"),
+                        String.format("add orders buttons. Size:%s", !CollectionsHelper.isEmpty(orders) ? orders.size() : null));
+                final Order order = orders.get(i);
 
-            switch (i) {
-                case 0: {
-                    btnOrder1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
-                        }
-                    });
-                    btnOrder1.setVisibility(View.VISIBLE);
-                    break;
-                }
-                case 1: {
-                    btnOrder2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
-                        }
-                    });
-                    btnOrder2.setVisibility(View.VISIBLE);
-                    break;
-                }
-                case 2: {
-                    btnOrder3.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
-                        }
-                    });
-                    btnOrder3.setVisibility(View.VISIBLE);
-                    break;
-                }
-                case 3: {
-                    btnOrder4.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
-                        }
-                    });
-                    btnOrder4.setVisibility(View.VISIBLE);
-                    break;
+                switch (i) {
+                    case 0: {
+                        btnOrder1.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
+                            }
+                        });
+                        btnOrder1.setVisibility(View.VISIBLE);
+                        break;
+                    }
+                    case 1: {
+                        btnOrder2.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
+                            }
+                        });
+                        btnOrder2.setVisibility(View.VISIBLE);
+                        break;
+                    }
+                    case 2: {
+                        btnOrder3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
+                            }
+                        });
+                        btnOrder3.setVisibility(View.VISIBLE);
+                        break;
+                    }
+                    case 3: {
+                        btnOrder4.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);
+                            }
+                        });
+                        btnOrder4.setVisibility(View.VISIBLE);
+                        break;
+                    }
                 }
             }
+        } catch (Throwable ex) {
+            ToolsHelper.logException(ex);
         }
+    }
+
+    public void updateFromServer() {
+        //if (courier.getCurrentCoordinate() == null) courier.setCurrentCoordinate(new Coordinate(53.193688, 50.185753));
+
+        if (courier.getCurrentCoordinate() != null) {
+            courier.requestDataFromServer(mainMapsActivity);
+            updateGui(courier);
+
+            Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "updateFromServer"),
+                    String.format("Courier %s coordinates has sent (lat = %s, lng = %s)",
+                            courier.getId(), courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()));
+        }
+    }
+
+    public void initTimer() {
+        Timer timer = new Timer();
+        mainMapsActivity.setTimerActive(true);
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+
+            @Override
+            public void run() {
+                //updateFromServer();
+                try {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mainMapsActivity.isTimerActive()) {
+                                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "initTimer"), String.format("Courier %s currentCoordinate set", courier));
+                                updateFromServer();
+                            }
+                        }
+                    });
+                } catch (Throwable ex) {
+                    ToolsHelper.logException(ex);
+                }
+            }
+        }, 1000, 5000);
     }
 
     private LocationListener locationListener = new LocationListener() { //TODO NOT FORGOT ABOUT PERMISSIONS FOR MAPS1 IN PHONE/SECURITY
         @Override
         public void onLocationChanged(Location location) {
-            //if(courier.isRebuildRouteNeeded(changedLocation) || courier.getCurrentCoordinate() == null) {
-            if (/*true ||*/ courier.getCurrentCoordinate() == null) {// || isGpsLocation(location) || courier.getCurrentCoordinate() == null) {
-                /*location.setLatitude(location.getLatitude() + coordinateCounter);
-                location.setLongitude(location.getLongitude() + coordinateCounter);
-                coordinateCounter += 0.001;*/
-                //Coordinate changedLocation = new Coordinate(location.getLatitude(), location.getLatitude());
-
+            try {
                 Coordinate changedLocation = new Coordinate(location);
 
                 courier.setCurrentCoordinate(changedLocation);
+                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "OnLocationChanged"), String.format("Courier %s currentCoordinate set", courier));
+
                 courier.requestDataFromServer(mainMapsActivity);
                 updateGui(courier);
 
-                //toast.setText("Отправка текущих координат курьера...");
-                //toast.show();
-                Log.d("Request", String.format("Courier %s coordinates has sent (lat = %s, lng = %s)", courier.getId(), courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()));
+                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "OnLocationChanged"),
+                        String.format("Courier %s coordinates has sent (lat = %s, lng = %s)",
+                                courier.getId(), courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()));
+            } catch (Throwable ex) {
+                ToolsHelper.logException(ex);
             }
-            /*checkEnabled();
-            showLocation(location);
-
-            Coordinate origin = new Coordinate(getMrkCurrentPos().getPosition().latitude, getMrkCurrentPos().getPosition().longitude);//стартовая позиция
-            url = "https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&destination=53.1899312,50.1720527&waypoints=53.163053, 50.195551&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
-
-            setUrlNewBridge("https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&waypoints=via:53.161654,50.194811&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
-            setUrlOldBridge(String.format("https://maps.googleapis.com/maps/api/directions/json?origin="+origin.getLat()+","+origin.getLng()+
-                                          "&waypoints=via:53.166325,50.073705&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA"));
-            if(routePoints!= null) {
-                //проверяем расстояние между текущими координатами и 1-й координатой маршрута, чтобы решить, надо ли перестраивать маршрут
-                distanceChanged = origin.distanceTo(routePoints.get(0).getLat(), routePoints.get(0).getLng());
-                if(distanceChanged>50) isRouteNeed = true;
-                else if(distanceChanged!=0) isRouteNeed = false;
-                toast.setText(Double.toString(distanceChanged));
-                toast.show();
-            }*/
-            //if(isRouteNeed) {
         }
 
         @Override
@@ -449,12 +461,14 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            if (provider.equals(LocationManager.GPS_PROVIDER)) {
-                toast.setText("Status: " + String.valueOf(status));
-            } else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
-                toast.setText("Status: " + String.valueOf(status));
+            if (Constants.IS_SHOW_MSG_PROVIDER_CHANGED) {
+                if (provider.equals(LocationManager.GPS_PROVIDER)) {
+                    toast.setText("Using: " + String.valueOf(LocationManager.GPS_PROVIDER));
+                } else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
+                    toast.setText("Using: " + String.valueOf(LocationManager.NETWORK_PROVIDER));
+                }
+                toast.show();
             }
-            toast.show();
         }
     };
 
@@ -478,11 +492,15 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
     }
 
     private void checkEnabled() {
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            toast.setText("Для работы с программой необходимо включить GPS!");
-            toast.show();
-            //отображаем меню для включения GPS
-            //startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+        try {
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                toast.setText("Для работы с программой необходимо включить GPS!");
+                toast.show();
+                //отображаем меню для включения GPS
+                //startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
+        } catch (Throwable ex) {
+            ToolsHelper.logException(ex);
         }
     }
 
@@ -498,66 +516,42 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        setmMap(googleMap);
-        setMrkCurrentPos(getmMap().addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Моё Текущее положение").visible(false)));
-        mMap.setPadding(0, Constants.MAP_PADDING_TOP_HALF_SCREEN, 70, 0);
-        mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMapToolbarEnabled(true);
-
-        Coordinate origin = new Coordinate(getMrkCurrentPos().getPosition().latitude, getMrkCurrentPos().getPosition().longitude);//стартовая позиция
-        url = "https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&destination=53.1899312,50.1720527&waypoints=53.163053, 50.195551&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
-
-
-        setUrlNewBridge("https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&waypoints=via:53.161654,50.194811&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
-        setUrlOldBridge(String.format("https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng() +
-                "&waypoints=via:53.166325,50.073705&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA"));
-
-        googleMap.setInfoWindowAdapter(new InfoWindowAdapterImpl(getLayoutInflater()));
-        //courier.requestDataFromServer(this);
-
-
-        //LatLng sydney = new LatLng(-34, 151);
-        //getMarker().title = mMap.addMarker(new MarkerOptions().position(sydney).title("MarkerTitle2").draggable(true));
-        //getMarker().setTitle("ChangedMarkerTitle");
-        //getMarker().showInfoWindow();
-        //mMap.setPadding(0,0,10,10);
-
-
-        //получение маршрута
-        /*Coordinate origin = new Coordinate(getMrkCurrentPos().getPosition().latitude, getMrkCurrentPos().getPosition().longitude);//стартовая позиция
-        url = "https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&destination=53.1899312,50.1720527&waypoints=53.163053, 50.195551&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
-        setUrlNewBridge("https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&waypoints=via:53.161654,50.194811&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
-        setUrlOldBridge(String.format("https://maps.googleapis.com/maps/api/directions/json?origin={0},{1}&waypoints=via:53.166325,50.073705&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA",
-                origin.getLat(),origin.getLng()));
-
-        NetworkDAO networkDAO = new NetworkDAO();
         try {
-            //timeNotification = new TimeNotification(this, null);
-            //timeNotification.setOnetimeTimer(this.getApplicationContext());
+            setmMap(googleMap);
+            LatLng initPosition = new LatLng(53.123829, 50.0947843);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 10));
+            setMrkCurrentPos(getmMap().addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Моё Текущее положение").visible(false)));
+            mMap.setPadding(0, Constants.MAP_PADDING_TOP_HALF_SCREEN, 70, 0);
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMapToolbarEnabled(true);
 
-            //onetimeTimer();
-            networkDAO.execute(this);
-            //getRequest = networkDAO.request(url);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
+            Coordinate origin = new Coordinate(getMrkCurrentPos().getPosition().latitude, getMrkCurrentPos().getPosition().longitude);//стартовая позиция
+            url = "https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&destination=53.1899312,50.1720527&waypoints=53.163053, 50.195551&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
 
+
+            setUrlNewBridge("https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&waypoints=via:53.161654,50.194811&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
+            setUrlOldBridge(String.format("https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng() +
+                    "&waypoints=via:53.166325,50.073705&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA"));
+
+            googleMap.setInfoWindowAdapter(new InfoWindowAdapterImpl(getLayoutInflater()));
+        } catch (Throwable ex) {
+            ToolsHelper.logException(ex);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        Log.i(MainMapsActivity.class.getSimpleName(), "onStop!");
+        //if (trackingIntent != null) stopService(trackingIntent);
+        //ActivityHelper.stopService(this, TrackingService.class);
+        super.onStop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        locationManager.removeUpdates(locationListener);
+
+        if (locationManager != null) locationManager.removeUpdates(locationListener);
     }
 
     public Marker getMrkCurrentPos() {
@@ -635,5 +629,13 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
 
     public void setLocationManager(LocationManager locationManager) {
         this.locationManager = locationManager;
+    }
+
+    public boolean isTimerActive() {
+        return timerActive;
+    }
+
+    public void setTimerActive(boolean timerActive) {
+        this.timerActive = timerActive;
     }
 }

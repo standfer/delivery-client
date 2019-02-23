@@ -9,25 +9,17 @@ import java.io.Serializable;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WorkPlace implements Serializable {
-    private int id;
+public class WorkPlace extends BaseEntity
+        implements Serializable, Cloneable {
     private String address;
     private Coordinate location;
 
     public WorkPlace(){}
 
     public WorkPlace(int id, String address, double latitude, double longitude) {
-        this.id = id;
+        setId(id);
         this.address = address;
         this.location = new Coordinate(latitude, longitude);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getAddress() {
@@ -44,5 +36,20 @@ public class WorkPlace implements Serializable {
 
     public void setLocation(Coordinate location) {
         this.location = location;
+    }
+
+    public static boolean isEmpty(WorkPlace workPlace) {
+        return workPlace == null || Coordinate.isEmpty(workPlace.getLocation());
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        WorkPlace workPlaceCloned = (WorkPlace) super.clone();
+
+        if (location != null) {
+            workPlaceCloned.setLocation(new Coordinate(location.getLat(), location.getLng()));
+        }
+
+        return workPlaceCloned;
     }
 }

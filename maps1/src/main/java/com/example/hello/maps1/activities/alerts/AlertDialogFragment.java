@@ -14,6 +14,8 @@ import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.helpers.ToolsHelper;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,14 +46,19 @@ public class AlertDialogFragment {
         return builder.create();
     }*/
 
-    public static AlertDialog showOrdersToAssign (final MainMapsActivity mainMapsActivity) {
-        if (mainMapsActivity.getCourier() != null && mainMapsActivity.getCourier().getOrdersAvailable() != null) {
-            final Courier courier = mainMapsActivity.getCourier();
+    public static AlertDialog showOrdersToAssign(final MainMapsActivity mainMapsActivity) throws CloneNotSupportedException {
+        if (mainMapsActivity.getCourier() != null && mainMapsActivity.getCourier().isReadyToAssign() &&
+                mainMapsActivity.getCourier().getOrdersAvailable() != null) {
+
+            final Courier courierOrigin = mainMapsActivity.getCourier(); //todo delete if all ok
+
+            final Courier courier = courierOrigin;
             final List<Order> ordersAvailable = courier.getOrdersAvailable();
             final List<Order> ordersToAssign = courier.getOrdersToAssign();
 
             final String[] ordersData = new String[ordersAvailable.size()];
             courier.getOrdersData(ordersAvailable).toArray(ordersData);
+            courier.setReadyToAssign(false);
 
             final boolean[] checkedItems = new boolean[ordersAvailable.size()];
             for (boolean item : checkedItems) {
@@ -79,14 +86,19 @@ public class AlertDialogFragment {
                                     ordersToAssign.add(ordersAvailable.get(i));
                                 }
                             }
-                            courier.setOrdersToAssign(ordersToAssign);
-                            courier.updateOrdersAssignedInDb(mainMapsActivity);
+                            courier.assignOrders(ordersToAssign, mainMapsActivity);
+                            courier.updateAssignmentState();
+                            //mainMapsActivity.setCourier(courier);
+                            mainMapsActivity.setTimerActive(true);
                         }
                     })
                     .setNegativeButton("Отмена",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     dialog.cancel();
+                                    courier.updateAssignmentState();
+                                    //mainMapsActivity.setCourier(courier);
+                                    mainMapsActivity.setTimerActive(true);
                                 }
                             });
             AlertDialog alert = builder.create();

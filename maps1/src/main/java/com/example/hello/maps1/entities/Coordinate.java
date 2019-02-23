@@ -17,7 +17,8 @@ import java.io.Serializable;
  * Created by ivan_grinenko on 14.08.2016.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Coordinate implements Serializable {
+public class Coordinate extends BaseEntity
+        implements Serializable, Cloneable {
 
     @JsonProperty("lat")
     private Double lat;
@@ -25,13 +26,15 @@ public class Coordinate implements Serializable {
     @JsonProperty("lng")
     private Double lng;
 
-    public Coordinate(){
+    public Coordinate() {
     }
-    public Coordinate(double lat, double lng){
-        this.lat=lat;
-        this.lng=lng;
+
+    public Coordinate(double lat, double lng) {
+        this.lat = lat;
+        this.lng = lng;
     }
-    public Coordinate(Location location){
+
+    public Coordinate(Location location) {
         this.lat = location.getLatitude();
         this.lng = location.getLongitude();
     }
@@ -52,7 +55,7 @@ public class Coordinate implements Serializable {
         this.lng = lng;
     }
 
-    public String toString(){
+    public String toString() {
         return String.format("%s,%s", lat, lng);
     }
 
@@ -60,27 +63,33 @@ public class Coordinate implements Serializable {
         return !Coordinate.isEmpty(destLocation) ? distanceTo(destLocation.getLat(), destLocation.getLng()) : null; //todo check if null for double is ok, had not to make Double
     }
 
-    public double distanceTo(double destLat, double destLng){//расстояние между координатами для проверки, нужно ли перестраивать маршрут
+    public double distanceTo(double destLat, double destLng) {//расстояние между координатами для проверки, нужно ли перестраивать маршрут
 
         Location origin = new Location(LocationManager.GPS_PROVIDER);
         Location dest = new Location(LocationManager.GPS_PROVIDER);
-        origin.setLatitude(lat); origin.setLongitude(lng);
-        dest.setLatitude(destLat); dest.setLongitude(destLng);
+        origin.setLatitude(lat);
+        origin.setLongitude(lng);
+        dest.setLatitude(destLat);
+        dest.setLongitude(destLng);
 
         return origin.distanceTo(dest);
     }
 
-    public String toJson(){//сериализация объекта координата
+    public String toJson() {//сериализация объекта координата
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             return gson.toJson(this);
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             return ex.toString();
         }
     }
 
     public static boolean isEmpty(Coordinate coordinate) {
         return coordinate == null || coordinate.getLat() == null || coordinate.getLng() == null;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

@@ -1,5 +1,6 @@
 package com.example.hello.maps1.helpers;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -26,7 +27,8 @@ public class NotificationHelper {
         Notification myNotication;
 
         Notification.Builder builder = new Notification.Builder(activity);
-        builder.setAutoCancel(true);
+        builder.setAutoCancel(false);
+        builder.setOngoing(true);
         builder.setTicker(messageRoute);
         builder.setContentTitle(title);
         builder.setContentText(messageRoute);
@@ -51,5 +53,30 @@ public class NotificationHelper {
         ////mainMapsActivity.getTimeNotification().setOnetimeTimer(context);
 
         //AlarmManager am = (AlarmManager) mainMapsActivity.getSystemService(ALARM_SERVICE);
+    }
+
+    public static void showNotification(Activity activity, String title, String messageRoute, Intent intent) {
+        Context context = activity.getApplicationContext();
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        NotificationManager manager = (NotificationManager) activity.getSystemService(activity.NOTIFICATION_SERVICE);
+        Notification myNotication;
+
+        Notification.Builder builder = new Notification.Builder(activity);
+        builder.setAutoCancel(false);
+        builder.setOngoing(true);
+        builder.setTicker(messageRoute);
+        builder.setContentTitle(title);
+        builder.setContentText(messageRoute);
+        builder.setSmallIcon(R.drawable.ic_cast_light);
+        builder.setContentIntent(pendingIntent);
+        builder.setNumber(100);
+        builder.setWhen(System.currentTimeMillis());
+
+        myNotication = builder.getNotification();
+        myNotication.defaults = Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
+
+        manager.notify(11, myNotication);
     }
 }
