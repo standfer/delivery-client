@@ -49,8 +49,6 @@ public class MyIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
 //intent.getClass().
         //this.
-        answerOldBridge = request("https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&waypoints=via:53.166325,50.073705&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
-        answerNewBridge = request("https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&waypoints=via:53.161654,50.194811&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
         //преобразуем результат во время
         int msecondsOldBridge = routeInSeconds(answerOldBridge)*1000;
         int msecondsNewBridge = routeInSeconds(answerNewBridge)*1000;

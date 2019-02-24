@@ -9,7 +9,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity implements OnMapReadyCallback {
+public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity implements OnMapReadyCallback {
     protected Intent trackingIntent;
 
     private GoogleMap mMap;
@@ -526,12 +526,6 @@ public class MainMapsActivity extends /*FragmentActivity*/ActionBarActivity impl
             mMap.getUiSettings().setMapToolbarEnabled(true);
 
             Coordinate origin = new Coordinate(getMrkCurrentPos().getPosition().latitude, getMrkCurrentPos().getPosition().longitude);//стартовая позиция
-            url = "https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&destination=53.1899312,50.1720527&waypoints=53.163053, 50.195551&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
-
-
-            setUrlNewBridge("https://maps.googleapis.com/maps/api/directions/json?origin=53.1238733,50.092532&waypoints=via:53.161654,50.194811&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
-            setUrlOldBridge(String.format("https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng() +
-                    "&waypoints=via:53.166325,50.073705&destination=53.194435,50.112780&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA"));
 
             googleMap.setInfoWindowAdapter(new InfoWindowAdapterImpl(getLayoutInflater()));
         } catch (Throwable ex) {

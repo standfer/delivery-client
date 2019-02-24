@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.hello.maps1" >
 
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="26"/>
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -32,7 +34,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA" />
+            android:value="google_api_key" />
 
         <service
             android:name="com.example.hello.maps1.services.TrackingService"

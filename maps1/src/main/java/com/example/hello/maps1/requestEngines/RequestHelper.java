@@ -83,7 +83,7 @@ public class RequestHelper {
         try {
             URL url = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng() +
                     "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA");
+                    "&departure_time=now&traffic_model=best_guess&key=google_api_key");
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
             InputStream in = new BufferedInputStream(connection.getInputStream());//);url.openStream()
@@ -117,7 +117,7 @@ public class RequestHelper {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
             }
             urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
+                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -145,7 +145,7 @@ public class RequestHelper {
                 urlBuilder += String.format("%s,%s", waypoint.getLng(), waypoint.getLat());
             }
             urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
+                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -182,7 +182,7 @@ public class RequestHelper {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
             }
             urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
+                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
