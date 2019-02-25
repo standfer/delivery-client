@@ -1,13 +1,10 @@
 package com.example.hello.maps1;
 
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -17,10 +14,9 @@ import android.widget.EditText;
 import com.example.hello.maps1.asyncEngines.CredentialsLoader;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.helpers.ActivityHelper;
-import com.example.hello.maps1.helpers.NotificationHelper;
 import com.example.hello.maps1.services.TrackingService;
+import com.rohitss.uceh.UCEHandler;
 
-import java.io.Serializable;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -45,6 +41,8 @@ public class LoginActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new UCEHandler.Builder(this).build();
+
         setContentView(R.layout.activity_login);
         //startTimer();
 
