@@ -44,11 +44,14 @@ public interface Constants {
 
     Long TIMEOUT_COURIER_ASSIGNMENT = 30000L;
     double PROXIMITY_ALERT_RADIUS = 300;
-    int ONGOING_NOTIFICATION_ID = 121;
+    int ONGOING_NOTIFICATION_ID = 122163;
     String SERVICE_NOTIFICATION_CHANNEL_ID = "TrackingService_" + ONGOING_NOTIFICATION_ID;
     int SERVICE_NOTIFICATION_ICON = R.drawable.ic_cast_light;
     String SERVICE_NOTIFICATION_TITLE = "Доставка";
     String SERVICE_NOTIFICATION_TEXT = "Приложение запущено";
+
+    int ALARM_RECEIVER_ID = 321456;
+    long ALARM_INTERVAL_FIVE_SECONDS = 5000L; //300000L;
 
 
     boolean IS_UI_REFRESH_ENABLED = false;

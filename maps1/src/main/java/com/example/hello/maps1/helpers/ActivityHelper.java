@@ -2,19 +2,22 @@ package com.example.hello.maps1.helpers;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Process;
-import android.support.annotation.IdRes;
-import android.support.v4.app.FragmentManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.example.hello.maps1.services.restarters.AlarmReceiver;
 
 import java.io.Serializable;
 import java.util.logging.Logger;
@@ -107,34 +110,59 @@ public class ActivityHelper {
         return result;
     }
 
-    //added for instant run works with google maps activity, fyi: https://issuetracker.google.com/issues/66402372
-    public static void addActivityToBackStack(Bundle savedInstanceState, SupportMapFragment mapFragment, FragmentManager supportFragmentManager, OnMapReadyCallback callback, @IdRes int idMap, String mapTagName) {
-        //FragmentTransaction mapTransaction = supportFragmentManager.beginTransaction();
-        //mapTransaction.addToBackStack(mapTagName).add(idMap, mapFragment, mapTagName).commit();
-
-        /*if (savedInstanceState == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            FragmentTransaction mapTransaction = supportFragmentManager.beginTransaction();
-            mapTransaction.addToBackStack(mapTagName).add(idMap, mapFragment, mapTagName).commit();
-        }*/
-        mapFragment.getMapAsync(callback); //need surely also without instant run fix
-
-        /*//mapFragment will be destroy if not added toBackStack so, for Instant Run :
-        if (savedInstanceState!=null) { mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentByTag("map"); }
-        else { mapFragment = SupportMapFragment.newInstance();
-            FragmentTransaction mapTransaction = getSupportFragmentManager().beginTransaction();
-            mapTransaction.addToBackStack("map").add(R.id.map,mapFragment,"map").commit(); }
-        mapFragment.getMapAsync(this);*/
+    public static void putBytesToIntent(Intent intent, Object... parameters) {
+        try {
+            for (Object parameter : parameters) {
+                if (parameter != null) {
+                    intent.putExtra(parameter.getClass().getSimpleName(),
+                            ParcelableHelper.getByteArrayFromObject(parameter));
+                }
+            }
+        } catch (Throwable e) {
+            Logger.getAnonymousLogger().warning(String.format("Can't transmit parameter to intent %s", intent));
+        }
     }
 
-    public static Intent startService(Activity activity, Courier courier, Class<?> serviceClass) {
-        Intent intent = new Intent(activity.getApplicationContext(), serviceClass);
+    public static Object getFromIntentBytes(Intent intent, Class<? extends Serializable> classObject) {
+        Object result = null;
+
+        byte[] byteArray = intent.getByteArrayExtra(classObject.getSimpleName());
+
+        if (byteArray != null) {
+            result = ParcelableHelper.getObjectFromByteArray(byteArray);
+        }
+
+        return result;
+    }
+
+    public static Intent startService(Context context, Courier courier, Class<?> serviceClass) {
+        Intent intent = new Intent(context, serviceClass);
         ActivityHelper.putToIntent(intent, (Object) courier);
 
-        if (!isMyServiceRunning(activity, serviceClass)) {
-            activity.startService(intent);
+        if (!isMyServiceRunning(context, serviceClass)) {
+            context.startService(intent);
         }
+
+        startAlarmManager(context, courier);
         return intent;
+    }
+
+    public static void startAlarmManager(Context context, Courier courier) {
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        ActivityHelper.putBytesToIntent(intent, courier);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context, Constants.ALARM_RECEIVER_ID, intent, 0);
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        if(Build.VERSION.SDK_INT >= 23) {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + Constants.ALARM_INTERVAL_FIVE_SECONDS, pendingIntent);
+        } else {
+            am.set(AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + Constants.ALARM_INTERVAL_FIVE_SECONDS, pendingIntent);
+        }
     }
 
     public static void stopService(Activity activity, Class<?> serviceClass) {
@@ -142,8 +170,8 @@ public class ActivityHelper {
         activity.stopService(serviceIntent);
     }
 
-    public static boolean isMyServiceRunning(Activity activity, Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+    public static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         if (manager == null) return false;
 
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -172,5 +200,13 @@ public class ActivityHelper {
                 }
             }
         }
+    }
+
+    public static Intent getWhiteListIntent(Context context) {
+        Intent intent = new
+                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                Uri.parse("package:" + context.getPackageName()));
+
+        return intent;
     }
 }

@@ -250,6 +250,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         super.onCreate(savedInstanceState);
         try {
             ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
+            startActivity(ActivityHelper.getWhiteListIntent(getApplicationContext()));
 
             this.mainMapsActivity = this;
             isRouteNeed = true;
@@ -270,7 +271,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
 
             //ActivityHelper.startTrackingService(this, courier);
-            ActivityHelper.startService(this, courier, TrackingService.class);
+            ActivityHelper.startService(getApplicationContext(), courier, TrackingService.class);
 
             /*trackingIntent = new Intent(getApplicationContext(), TrackingService.class);
             ActivityHelper.putToIntent(trackingIntent, (Object) courier);

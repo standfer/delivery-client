@@ -44,30 +44,6 @@ public class LoginActivity extends FragmentActivity {
         new UCEHandler.Builder(this).build();
 
         setContentView(R.layout.activity_login);
-        //startTimer();
-
-        /*String manufacturer = "xiaomi";
-        if (manufacturer.equalsIgnoreCase(android.os.Build.MANUFACTURER)) {
-            //this will open auto start screen where user can enable permission for your app
-            *//*Intent intent1 = new Intent();
-            intent1.setComponent(new ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"));
-            startActivity(intent1);*//*
-
-            Intent intent = new Intent();
-            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            Uri uri = Uri.fromParts("package", getPackageName(), null);
-            intent.setData(uri);
-            startActivity(intent);
-        }*/
-
-        /*trackingService = new TrackingService(this);
-        trackingIntent = new Intent(getApplicationContext(), trackingService.getClass());
-
-        if (!isMyServiceRunning(trackingService.getClass())) {
-            NotificationHelper.showNotification(this, "Доставка", "Приложение работает", trackingIntent);
-            startService(trackingIntent);
-
-        }*/
 
         this.loginActivity = this;
         initGui();
@@ -85,18 +61,6 @@ public class LoginActivity extends FragmentActivity {
         super.onStop();
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                Log.i (String.format("isMyService '%s' Running?", serviceClass), true+"");
-                return true;
-            }
-        }
-        Log.i (String.format("isMyService '%s' Running?", serviceClass), false+"");
-        return false;
-    }
-
     private void initGUIListeners() {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,19 +69,10 @@ public class LoginActivity extends FragmentActivity {
                 try {
                     CredentialsLoader credentialsLoader = new CredentialsLoader();
                     credentialsLoader.execute(loginActivity);
-                    /*if (courier.getId() != 0) {
-                        openMainActivity(courier.getId());
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Неверный логин или пароль",Toast.LENGTH_SHORT).show();
-                        etLogin.setBackgroundColor(Color.RED);
-                        etPassword.setBackgroundColor(Color.RED);
-                    }*/
                 }
                 catch (Throwable e) {
-                    String err = e.toString();
+                    e.printStackTrace();
                 }
-
-                //setContentView(R.layout.activity_main_maps);
             }
         });
 
