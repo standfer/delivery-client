@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.hello.maps1" >
 
-    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="26"/>
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -15,6 +14,7 @@
     <uses-permission android:name="android.permission.ACTION_CALL" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 

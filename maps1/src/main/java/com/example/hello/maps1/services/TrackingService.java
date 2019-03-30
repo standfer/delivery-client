@@ -1,25 +1,20 @@
 package com.example.hello.maps1.services;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.helpers.ActivityHelper;
+import com.example.hello.maps1.helpers.NotificationHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.services.restarters.TrackingRestarterBroadcastReceiver;
 
@@ -44,42 +39,15 @@ public class TrackingService extends Service {
     }
 
     private void startInForeground() {
-        Intent notificationIntent = new Intent(this, MainMapsActivity.class);
-        PendingIntent pendingIntent=PendingIntent.getActivity(this,0,notificationIntent,0);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setSmallIcon(Constants.SERVICE_NOTIFICATION_ICON)
-                .setContentIntent(pendingIntent)
-                .setContentTitle(Constants.SERVICE_NOTIFICATION_TITLE)
-                .setContentText(Constants.SERVICE_NOTIFICATION_TEXT);
-        Notification notification=builder.build();
-        createIfAndroidOreoNotification(notification, pendingIntent);
+        Notification notification = NotificationHelper.createServiceNotification(this);
         startForeground(Constants.ONGOING_NOTIFICATION_ID, notification);
-    }
-
-    private void createIfAndroidOreoNotification(Notification notification, PendingIntent pendingIntent) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    Constants.SERVICE_NOTIFICATION_CHANNEL_ID,
-                    TrackingService.class.getName(),
-                    NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription(TrackingService.class.getName());
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(channel);
-
-            notification = new Notification.Builder(this, Constants.SERVICE_NOTIFICATION_CHANNEL_ID)
-                    .setContentTitle(Constants.SERVICE_NOTIFICATION_TITLE)
-                    .setContentText(Constants.SERVICE_NOTIFICATION_TEXT)
-                    .setSmallIcon(Constants.SERVICE_NOTIFICATION_ICON)
-                    .setContentIntent(pendingIntent)
-                    .build();
-        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TrackingService.class.getSimpleName(), "Tracking service onStartCommand!!");
         super.onStartCommand(intent, flags, startId);
-        if (intent.getExtras() == null) return START_STICKY;
+        if (intent == null || intent.getExtras() == null) return START_STICKY;
 
         this.courier = (Courier) ActivityHelper.getFromIntent(intent, Courier.class);
         this.locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);

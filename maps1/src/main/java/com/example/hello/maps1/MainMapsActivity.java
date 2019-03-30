@@ -1,6 +1,9 @@
 package com.example.hello.maps1;
 
 import android.Manifest;
+import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -184,22 +187,29 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     private void initPermissions() {
         int permissionLocationStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        int permissionCallPhoneStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        int permissionInternetStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        int permissionWakeLockStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permissionCoarceLocationStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int permissionCallPhoneStatus = ContextCompat.checkSelfPermission(this, Manifest.
+                permission.CALL_PHONE);
+        int permissionInternetStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
+        int permissionWakeLockStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK);
+        int permissionForegroundStatus = ContextCompat.checkSelfPermission(this, "android.permission.FOREGROUND_SERVICE");
 
         if (permissionLocationStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionCoarceLocationStatus != PackageManager.PERMISSION_GRANTED ||
                 permissionCallPhoneStatus != PackageManager.PERMISSION_GRANTED ||
                 permissionInternetStatus != PackageManager.PERMISSION_GRANTED ||
                 permissionWakeLockStatus != PackageManager.PERMISSION_GRANTED
+                || permissionForegroundStatus != PackageManager.PERMISSION_GRANTED
         ) {
 
             ActivityCompat.requestPermissions(this, new String[]
                     {
                             Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
                             Manifest.permission.CALL_PHONE,
                             Manifest.permission.INTERNET,
-                            Manifest.permission.WAKE_LOCK
+                            Manifest.permission.WAKE_LOCK,
+                            "android.permission.FOREGROUND_SERVICE"
 
                     }, Constants.REQUEST_CODE_PERMISSION_ALL);
         }
@@ -251,6 +261,13 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         try {
             ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
             startActivity(ActivityHelper.getWhiteListIntent(getApplicationContext()));
+            ComponentName mDeviceAdmin = new ComponentName(this, DeviceAdminReceiver.class);
+
+            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
+
+            startActivity(intent);
+
 
             this.mainMapsActivity = this;
             isRouteNeed = true;

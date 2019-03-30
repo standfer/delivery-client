@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Process;
 import android.provider.Settings;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -140,7 +141,7 @@ public class ActivityHelper {
         ActivityHelper.putToIntent(intent, (Object) courier);
 
         if (!isMyServiceRunning(context, serviceClass)) {
-            context.startService(intent);
+            ContextCompat.startForegroundService(context, intent);
         }
 
         startAlarmManager(context, courier);
@@ -157,10 +158,10 @@ public class ActivityHelper {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         if(Build.VERSION.SDK_INT >= 23) {
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + Constants.ALARM_INTERVAL_FIVE_SECONDS, pendingIntent);
         } else {
-            am.set(AlarmManager.RTC_WAKEUP,
+            am.setExact(AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + Constants.ALARM_INTERVAL_FIVE_SECONDS, pendingIntent);
         }
     }
