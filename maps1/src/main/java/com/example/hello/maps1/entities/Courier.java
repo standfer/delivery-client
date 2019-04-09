@@ -1,6 +1,7 @@
 package com.example.hello.maps1.entities;
 
 import android.app.AlertDialog;
+import android.location.Location;
 import android.util.Log;
 
 import com.example.hello.maps1.MainMapsActivity;
@@ -119,6 +120,10 @@ public class Courier
         this.currentCoordinate = currentCoordinate;
         this.geo_lat = currentCoordinate.getLat();
         this.geo_lon = currentCoordinate.getLng();
+    }
+
+    public void setCurrentCoordinate(Location location) {
+        setCurrentCoordinate(new Coordinate(location));
     }
 
     public String getData() {

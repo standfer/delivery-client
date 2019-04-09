@@ -48,6 +48,11 @@
             android:enabled="true" >
         </service>
 
+        <service
+            android:name="com.example.hello.maps1.services.LocationUpdatesService"
+            android:enabled="true"
+            android:exported="true"/>
+
         <receiver
             android:name="com.example.hello.maps1.services.restarters.TrackingRestarterBroadcastReceiver"
             android:enabled="true"

@@ -3,8 +3,13 @@ package com.example.hello.maps1;
 import android.Manifest;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,19 +38,24 @@ import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
+import com.example.hello.maps1.services.LocationUpdatesService;
 import com.example.hello.maps1.services.TrackingService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.nullwire.trace.ExceptionHandler;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity implements OnMapReadyCallback {
     protected Intent trackingIntent;
@@ -68,6 +78,8 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     private boolean timerActive;
 
+    private LocationUpdatesService mService = null;
+
     //GUI
     private Button btnHelp, btnCall, btnManualMove, btnMoveToNextOrder, btnLogout;
     private Button btnOrder1, btnOrder2, btnOrder3, btnOrder4;
@@ -79,6 +91,26 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     private TimeNotification timeNotification;
 
     private LocationManager locationManager;
+    private boolean mBound = false;
+    // The BroadcastReceiver used to listen from broadcasts from the service.
+    private MyReceiver myReceiver;
+
+    // Monitors the state of the connection to the service.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationUpdatesService.LocalBinder binder = (LocationUpdatesService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mBound = false;
+        }
+    };
 
     private void initGUI() {
         btnCall = (Button) findViewById(R.id.btnCall);
@@ -120,12 +152,19 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             }
         });
 
-        btnCall.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
+        //btnCall.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
 
-        btnHelp.setOnClickListener(new View.OnClickListener() {
+        btnCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
+                //ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
+                if ("Включить отслеживание".equals(btnCall.getText())) {
+                    btnCall.setText("Выключить отслеживание");
+                    mService.requestLocationUpdates(getApplicationContext());
+                } else {
+                    btnCall.setText("Включить отслеживание");
+                    mService.removeLocationUpdates();
+                }
             }
         });
 
@@ -257,6 +296,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        myReceiver = new MyReceiver();
         try {
             ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
             startActivity(ActivityHelper.getWhiteListIntent(getApplicationContext()));
@@ -285,9 +325,12 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             idCourier = getIntent().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
             courier = new Courier(idCourier, "Vasya", 1);
 
+            Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
+            ActivityHelper.putToIntent(locationUpdateIntent, courier);
+            bindService(locationUpdateIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
             //ActivityHelper.startTrackingService(this, courier);
-            ActivityHelper.startService(getApplicationContext(), courier, TrackingService.class);
+            //ActivityHelper.startService(getApplicationContext(), courier, TrackingService.class);
 
             /*trackingIntent = new Intent(getApplicationContext(), TrackingService.class);
             ActivityHelper.putToIntent(trackingIntent, (Object) courier);
@@ -316,10 +359,26 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
+        ActivityHelper.putToIntent(locationUpdateIntent, courier);
+        bindService(locationUpdateIntent, mServiceConnection,
+                Context.BIND_AUTO_CREATE);
+
+        if (mService != null) {
+            mService.requestLocationUpdates(getApplicationContext());
+        }
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
+                new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
 
         if (Constants.IS_UI_REFRESH_ENABLED) {
             try {
@@ -337,7 +396,21 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     @Override
     protected void onPause() throws SecurityException {
         super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
         if (locationManager != null) locationManager.removeUpdates(locationListener);
+    }
+    /**
+     * Receiver for broadcasts sent by {@link LocationUpdatesService}.
+     */
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
+            if (location != null) {
+                Toast.makeText(MainMapsActivity.this, ToolsHelper.getLocationText(location),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     public synchronized void updateGui(final Courier courier) {
@@ -537,7 +610,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             setmMap(googleMap);
             LatLng initPosition = new LatLng(53.123829, 50.0947843);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 10));
-            setMrkCurrentPos(getmMap().addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Моё Текущее положение").visible(false)));
+            //setMrkCurrentPos(getmMap().addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Моё Текущее положение").visible(false)));
             mMap.setPadding(0, Constants.MAP_PADDING_TOP_HALF_SCREEN, 70, 0);
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMapToolbarEnabled(true);
@@ -553,8 +626,14 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     @Override
     protected void onStop() {
         Log.i(MainMapsActivity.class.getSimpleName(), "onStop!");
-        //if (trackingIntent != null) stopService(trackingIntent);
-        //ActivityHelper.stopService(this, TrackingService.class);
+        if (mBound) {
+            // Unbind from the service. This signals to the service that this activity is no longer
+            // in the foreground, and the service can respond by promoting itself to a foreground
+            // service.
+            unbindService(mServiceConnection);
+            mBound = false;
+        }
+
         super.onStop();
     }
 

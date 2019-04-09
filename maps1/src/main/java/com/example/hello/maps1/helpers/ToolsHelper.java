@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import android.util.Log;
+import android.location.Location;
 import android.widget.Toast;
 
 import com.example.hello.maps1.entities.Order;
@@ -45,6 +46,11 @@ public class ToolsHelper {
     public static boolean isGpsPermissioned(Context context) {
         return (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED);
+    }
+
+    public static String getLocationText(Location location) {
+        return location == null ? "Unknown location" :
+                "(" + location.getLatitude() + ", " + location.getLongitude() + ")";
     }
 
     /*protected void enableGps() {
