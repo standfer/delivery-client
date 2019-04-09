@@ -1,10 +1,7 @@
 package com.example.hello.maps1.asyncEngines;
 
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
-import android.text.TextUtils;
 
-import com.example.hello.maps1.LoginActivity;
 import com.example.hello.maps1.SettingsActivity;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;

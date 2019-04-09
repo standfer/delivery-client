@@ -67,7 +67,7 @@ public class AlertDialogFragment {
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mainMapsActivity);
             builder.setTitle("Для вашего местоположения доступны следующие заказы:")
-                    .setIcon(R.drawable.ic_media_play)
+                    .setIcon(R.drawable.common_google_signin_btn_icon_dark_normal)
                     .setCancelable(false)
                     .setMultiChoiceItems(ordersData, checkedItems,
                             new DialogInterface.OnMultiChoiceClickListener() {

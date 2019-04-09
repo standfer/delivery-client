@@ -209,7 +209,7 @@ public class MyIntentService extends IntentService {
         builder.setTicker(messageRoute);
         builder.setContentTitle("Маршрут до работы");
         builder.setContentText(messageRoute);
-        builder.setSmallIcon(R.drawable.ic_cast_light);
+        builder.setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal);
         builder.setContentIntent(pendingIntent);
         builder.setNumber(100);
         builder.setWhen(System.currentTimeMillis());

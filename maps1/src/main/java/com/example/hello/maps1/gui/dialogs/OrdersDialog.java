@@ -5,10 +5,10 @@ package com.example.hello.maps1.gui.dialogs;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 
-import com.example.hello.maps1.MainMapsActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+
 import com.example.hello.maps1.R;
 
 /**
@@ -31,7 +31,7 @@ public class OrdersDialog extends DialogFragment { //not used, todo change if Al
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setTitle("Для вашего местоположения доступны следующие заказы:")
-                .setIcon(R.drawable.ic_media_play)
+                .setIcon(R.drawable.common_google_signin_btn_icon_dark_normal)
                 .setCancelable(false)
                 /*.setItems(ordersData, new DialogInterface.OnClickListener() {
                     @Override

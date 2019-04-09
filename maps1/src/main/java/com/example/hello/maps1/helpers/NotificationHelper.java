@@ -8,9 +8,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
+import androidx.core.app.NotificationCompat;
 
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
@@ -102,7 +102,7 @@ public class NotificationHelper {
         builder.setTicker(messageRoute);
         builder.setContentTitle(title);
         builder.setContentText(messageRoute);
-        builder.setSmallIcon(R.drawable.ic_cast_light);
+        builder.setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal);
         builder.setContentIntent(pendingIntent);
         builder.setNumber(100);
         builder.setWhen(System.currentTimeMillis());
@@ -139,7 +139,7 @@ public class NotificationHelper {
         builder.setTicker(messageRoute);
         builder.setContentTitle(title);
         builder.setContentText(messageRoute);
-        builder.setSmallIcon(R.drawable.ic_cast_light);
+        builder.setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal);
         builder.setContentIntent(pendingIntent);
         builder.setNumber(100);
         builder.setWhen(System.currentTimeMillis());

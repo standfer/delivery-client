@@ -2,7 +2,7 @@ package com.example.hello.maps1.entities;
 
 //import org.joda.time.DateTime;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.example.hello.maps1.entities.adapters.DateTimeAdapter;
 import com.example.hello.maps1.helpers.CollectionsHelper;
@@ -15,8 +15,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**

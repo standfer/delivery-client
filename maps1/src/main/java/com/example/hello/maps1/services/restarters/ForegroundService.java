@@ -5,8 +5,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 import com.example.hello.maps1.MainMapsActivity;
@@ -26,7 +26,7 @@ public class ForegroundService extends Service {
         Intent notificationIntent = new Intent(this, MainMapsActivity.class);
         PendingIntent pendingIntent=PendingIntent.getActivity(this,0,notificationIntent,0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_cast_light)
+                .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal)
                 .setContentIntent(pendingIntent)
                 .setContentTitle("Service")
                 .setContentText("Running...");

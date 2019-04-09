@@ -10,9 +10,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -274,9 +273,9 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             setContentView(R.layout.activity_main_maps);
 
             // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.map);
             mapFragment.setHasOptionsMenu(true);
-            mapFragment.getMapAsync(this);
+            //mapFragment.getMapAsync(this);
 
             initGUI();
 

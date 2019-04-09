@@ -1,9 +1,7 @@
 package com.example.hello.maps1;
 
-import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -19,7 +17,6 @@ import com.example.hello.maps1.helpers.ActivityHelper;
 import com.example.hello.maps1.helpers.StringHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
-import com.example.hello.maps1.requestEngines.RequestHelper;
 
 
 /**

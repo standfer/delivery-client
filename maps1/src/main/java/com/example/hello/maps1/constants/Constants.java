@@ -46,7 +46,7 @@ public interface Constants {
     double PROXIMITY_ALERT_RADIUS = 300;
     int ONGOING_NOTIFICATION_ID = 122163;
     String SERVICE_NOTIFICATION_CHANNEL_ID = "TrackingService_" + ONGOING_NOTIFICATION_ID;
-    int SERVICE_NOTIFICATION_ICON = R.drawable.ic_cast_light;
+    int SERVICE_NOTIFICATION_ICON = R.drawable.common_google_signin_btn_icon_dark_normal;
     String SERVICE_NOTIFICATION_TITLE = "Доставка";
     String SERVICE_NOTIFICATION_TEXT = "Приложение запущено";
 
