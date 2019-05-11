@@ -60,5 +60,5 @@ public interface Constants {
     boolean IS_UI_REFRESH_ENABLED = false;
     boolean IS_SHOW_MSG_PROVIDER_CHANGED = false;
 
-    String google_api_key = "AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
+    String google_api_key = "google_api_key";
 }
