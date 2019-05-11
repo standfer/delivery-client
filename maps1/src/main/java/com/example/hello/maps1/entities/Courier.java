@@ -356,6 +356,7 @@ public class Courier
             }
         } catch (JSONException e) {
             e.printStackTrace();
+            this.data = data;
         }
     }
 

@@ -9,14 +9,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,18 +31,18 @@ import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
+import com.example.hello.maps1.entities.responses.ResponseIlkato;
 import com.example.hello.maps1.helpers.ActivityHelper;
 import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
-import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
+import com.example.hello.maps1.requestEngines.RequestHelper;
+import com.example.hello.maps1.requestEngines.SSEHandler;
 import com.example.hello.maps1.services.LocationUpdatesService;
 import com.example.hello.maps1.services.TrackingService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.nullwire.trace.ExceptionHandler;
@@ -54,6 +52,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -94,6 +94,8 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     private boolean mBound = false;
     // The BroadcastReceiver used to listen from broadcasts from the service.
     private MyReceiver myReceiver;
+
+    protected SSEHandler sseHandler = new SSEHandler();
 
     // Monitors the state of the connection to the service.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -322,8 +324,12 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
 
-            idCourier = getIntent().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
+            idCourier = getIntent().getExtras() != null && getIntent().getExtras().get("id") != null ? (int) getIntent().getExtras().get("id") : 0;
             courier = new Courier(idCourier, "Vasya", 1);
+
+            sseHandler.setCourier(courier);
+            ResponseIlkato session = (ResponseIlkato) ActivityHelper.getFromIntent(getIntent(), ResponseIlkato.class);
+            RequestHelper.startEventSource(sseHandler, String.valueOf(session.getIdSession()));
 
             Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
             ActivityHelper.putToIntent(locationUpdateIntent, courier);
@@ -642,6 +648,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         super.onDestroy();
 
         if (locationManager != null) locationManager.removeUpdates(locationListener);
+        RequestHelper.stopEventSource(sseHandler);
     }
 
     public Marker getMrkCurrentPos() {

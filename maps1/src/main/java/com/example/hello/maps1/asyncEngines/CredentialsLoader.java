@@ -1,11 +1,16 @@
 package com.example.hello.maps1.asyncEngines;
 
 import android.os.AsyncTask;
-import android.text.TextUtils;
-import android.view.ViewDebug;
+import android.util.Log;
 
 import com.example.hello.maps1.LoginActivity;
 import com.example.hello.maps1.constants.Constants;
+import com.example.hello.maps1.entities.Courier;
+import com.example.hello.maps1.entities.requests.Data;
+import com.example.hello.maps1.entities.requests.RequestAction;
+import com.example.hello.maps1.entities.responses.GetTokenResponse;
+import com.example.hello.maps1.entities.responses.ResponseIlkato;
+import com.example.hello.maps1.helpers.JSONHelper;
 import com.example.hello.maps1.requestEngines.RequestHelper;
 
 /**
@@ -17,11 +22,35 @@ public class CredentialsLoader extends AsyncTask<LoginActivity, Void, Void> {
     protected Void doInBackground(LoginActivity... loginActivities) {
         LoginActivity loginActivity = loginActivities[0];
 
-        String courierRequest = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, "action=getCourierIdByCredentials&courier=" +  RequestHelper.convertObjectToJson(loginActivity.getCourier()));
-        if (courierRequest != null && TextUtils.isDigitsOnly(courierRequest)) {
-            loginActivity.getCourier().setId(Integer.parseInt(courierRequest));
-        }
-        loginActivity.logOn(loginActivity.getCourier());
+        loginActivity.logOn(getSessionSSE(loginActivity.getCourier()));
         return null;
+    }
+
+    private ResponseIlkato getSessionSSE(Courier courier) {
+        try {
+            GetTokenResponse tokenResponse = getToken(courier);
+            if (tokenResponse == null) return null;
+
+            RequestAction requestSessionAction = new RequestAction("subscribeToUpdates", new Data("41"));
+            String responseSession = RequestHelper.resultAuthPostRequest(Constants.SERVER_ADDRESS, JSONHelper.getJsonFromObject(requestSessionAction), tokenResponse.getData());
+
+            ResponseIlkato session = (ResponseIlkato) JSONHelper.getObjectFromJson(responseSession, ResponseIlkato.class);
+
+            Log.d(getClass().getSimpleName(), "Get session: " + (session != null ? session.getIdSession() : null));
+            return session;
+        } catch (Throwable ex) {
+            Log.d(getClass().getSimpleName(), "Get session failed");
+            return null;
+        }
+    }
+
+    private GetTokenResponse getToken(Courier courier) {
+        RequestAction requestAction = new RequestAction("getToken", new Data(courier));
+
+        String responseGetToken = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS, JSONHelper.getJsonFromObject(requestAction));
+        GetTokenResponse tokenResponse = (GetTokenResponse) JSONHelper.getObjectFromJson(responseGetToken, GetTokenResponse.class);
+
+        Log.d(getClass().getSimpleName(), "Get token: " + tokenResponse.getData());
+        return tokenResponse;
     }
 }

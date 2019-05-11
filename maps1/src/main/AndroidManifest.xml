@@ -36,7 +36,36 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="google_api_key" />
+            android:value="@string/google_api_key" />
+
+        <service
+            android:name="com.example.hello.maps1.services.TrackingService"
+            android:enabled="true" >
+        </service>
+
+        <service
+            android:name="com.example.hello.maps1.services.restarters.ForegroundService"
+            android:enabled="true" >
+        </service>
+
+        <service
+            android:name="com.example.hello.maps1.services.LocationUpdatesService"
+            android:enabled="true"
+            android:exported="true"/>
+
+        <receiver
+            android:name="com.example.hello.maps1.services.restarters.TrackingRestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped">
+        </receiver>
+
+        <receiver
+            android:name="com.example.hello.maps1.services.restarters.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="StartServiceByAlarm">
+        </receiver>
 
         <service
             android:name="com.example.hello.maps1.services.TrackingService"

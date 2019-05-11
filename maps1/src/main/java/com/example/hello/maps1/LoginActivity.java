@@ -11,6 +11,7 @@ import android.widget.EditText;
 
 import com.example.hello.maps1.asyncEngines.CredentialsLoader;
 import com.example.hello.maps1.entities.Courier;
+import com.example.hello.maps1.entities.responses.ResponseIlkato;
 import com.example.hello.maps1.helpers.ActivityHelper;
 import com.example.hello.maps1.services.TrackingService;
 import com.rohitss.uceh.UCEHandler;
@@ -109,6 +110,20 @@ public class LoginActivity extends FragmentActivity {
             ActivityHelper.changeActivity(getApplicationContext(), this, MainMapsActivity.class, courier.getId());
         } else {
             //Toast.makeText(getApplicationContext(), "Неверный логин или пароль",Toast.LENGTH_SHORT).show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    etLogin.setBackgroundColor(Color.RED);
+                    etPassword.setBackgroundColor(Color.RED);
+                }
+            });
+        }
+    }
+
+    public void logOn(ResponseIlkato session) {
+        if (session != null && !session.isEmpty()) {
+            ActivityHelper.changeActivity(getApplicationContext(), this, MainMapsActivity.class, session);
+        } else {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

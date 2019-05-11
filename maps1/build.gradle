@@ -37,6 +37,8 @@ dependencies {
     /*androidTestImplementation('androidx.test.espresso:espresso-core:3.1.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })*/
+
+    implementation 'com.tylerjroach:eventsource:1.2.11'
 }
 
 android {
@@ -52,21 +54,21 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    signingConfigs {
+    /*signingConfigs {
         release {
             storeFile file("C:\\Users\\lyubov_kutergina\\.android\\release.keystore")
             storePassword "123456"
             keyAlias "hello"
             keyPassword "654321"
         }
-    }
-    buildTypes {
+    }*/
+    /*buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
-    }
+    }*/
 
     packagingOptions {//TODO CHECK ISSUE HOW AVOID DISABLING LICENSES AND PLUG jackson-databind...
         exclude 'libs/jackson-core-2.9.2.jar'

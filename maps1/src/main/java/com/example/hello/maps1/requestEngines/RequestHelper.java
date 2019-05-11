@@ -1,10 +1,19 @@
 package com.example.hello.maps1.requestEngines;
 
+import android.util.Log;
+import android.util.Pair;
+
+import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.tylerjroach.eventsource.EventSource;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -16,13 +25,49 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Ivan on 12.03.2017.
  */
 
 public class RequestHelper {
+
+    public static String resultAuthPostRequest(String urlPath, String urlParameters, String token) {
+        try {
+            URL url = new URL(urlPath);
+
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("USER-AGENT", "Mozilla/5.0");
+            connection.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
+            connection.setRequestProperty("authorization", "Bearer " + token);
+            connection.setDoOutput(true);
+            DataOutputStream dStream = new DataOutputStream(connection.getOutputStream());
+            dStream.writeBytes(urlParameters);
+            dStream.flush();
+            dStream.close();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line = "";
+            StringBuilder responseOutput = new StringBuilder();
+            while ((line = br.readLine()) != null) {
+                responseOutput.append(line);
+            }
+            br.close();
+
+            return responseOutput != null ? responseOutput.toString() : "";
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     public static String resultPostRequest(String urlPath, String urlParameters) {
         try {
@@ -81,9 +126,16 @@ public class RequestHelper {
     public static String requestRouteByCoordinates(Coordinate origin, Coordinate destination) {
         HttpURLConnection connection = null;
         try {
-            URL url = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng() +
-                    "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key");
+            URL url = new URL(String.format(
+                    "https://maps.googleapis.com/maps/api/directions/json?origin=%s,%s" +
+                    "&destination=%s,%s" +
+                    "&departure_time=now&traffic_model=best_guess&key=%s",
+                    origin.getLat(),
+                    origin.getLng(),
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+                    ));
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
             InputStream in = new BufferedInputStream(connection.getInputStream());//);url.openStream()
@@ -116,8 +168,12 @@ public class RequestHelper {
             if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
             }
-            urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
+            urlBuilder += String.format("&destination=%s,%s" +
+                    "&departure_time=now&traffic_model=best_guess&key=%s",
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+            );
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -144,8 +200,12 @@ public class RequestHelper {
                 urlBuilder += urlBuilder.indexOf("waypoints") == -1 ? "&waypoints=via:" : "|";
                 urlBuilder += String.format("%s,%s", waypoint.getLng(), waypoint.getLat());
             }
-            urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
+            urlBuilder += String.format("&destination=%s,%s" +
+                            "&departure_time=now&traffic_model=best_guess&key=%s",
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+            );
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -181,8 +241,12 @@ public class RequestHelper {
             if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
             }
-            urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
+            urlBuilder += String.format("&destination=%s,%s" +
+                            "&departure_time=now&traffic_model=best_guess&key=%s",
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+            );
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -221,6 +285,24 @@ public class RequestHelper {
         } catch (Exception ex) {
             return ex.toString();
         }
+    }
+
+    public static void startEventSource(SSEHandler sseHandler, String idSession) {
+        Map<String, String> headers = new HashMap<>();
+
+        EventSource eventSource = new EventSource.Builder(Constants.SERVER_SSE_ADDRESS + idSession)
+                .eventHandler(sseHandler)
+                .headers(headers)
+                .build();
+        sseHandler.setEventSource(eventSource);
+        eventSource.connect();
+    }
+
+    public static void stopEventSource(SSEHandler sseHandler) {
+        if (sseHandler.getEventSource() != null) {
+            sseHandler.getEventSource().close();
+        }
+        sseHandler = null;
     }
 
 }

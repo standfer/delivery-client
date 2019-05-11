@@ -29,12 +29,16 @@ import java.util.logging.Logger;
 
 public class ActivityHelper {
 
-    public static void changeActivity(Context context, Activity oldActivity, Class newActivityClass, Object parameter) {
+    public static void changeActivity(Context context, Activity oldActivity, Class newActivityClass, Serializable parameter) {
         Intent intent = new Intent(oldActivity, newActivityClass);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK /*| Intent.FLAG_ACTIVITY_MULTIPLE_TASK*/); ////android.util.AndroidRuntimeException: Calling startActivity() from outside of an Activity  context requires the FLAG_ACTIVITY_NEW_TASK flag. Is this really what you want?
         try {
-            if (parameter != null && TextUtils.isDigitsOnly(parameter.toString())) {
-                intent.putExtra("id", (int) parameter);
+            if (parameter != null) {
+                if (parameter instanceof Integer && TextUtils.isDigitsOnly(parameter.toString())) {
+                    intent.putExtra("id", (int) parameter);
+                } else {
+                    intent.putExtra(parameter.getClass().getSimpleName(), parameter);
+                }
             }
         } catch (Throwable e) {
             Logger.getAnonymousLogger().warning(String.format("Can't transmit parameter from %s activity to %s activity", oldActivity.getLocalClassName(), newActivityClass.getName()));

@@ -10,7 +10,10 @@ public interface Constants {
     //String SERVER_ADDRESS = "http://192.168.1.37/delivery/helpers/helper.php"; //"http://192.168.0.102/delivery/helpers/helper.php";// "http://192.168.43.4/delivery/helpers/helper.php";//"http://192.168.1.34/delivery/helpers/helper.php";
     //String SERVER_ADDRESS = "http://192.168.43.185/delivery/helpers/helper.php";
 
-    String SERVER_ADDRESS = "http://standfer231.myjino.ru/delivery/helpers/helper.php";
+    //String SERVER_ADDRESS = "http://standfer231.myjino.ru/delivery/helpers/helper.php";
+    String SERVER_ADDRESS = "https://api.ilkato.ru";
+    String SERVER_SSE_ADDRESS = "https://api.ilkato.ru/events.php?id_session=";
+
     String SERVER_LOGS_URL = "http://standfer231.myjino.ru/delivery/logs/remote_stacktrace.php";
 
     String MSG_ORDER_PROBLEMS = "Внимание! Уведомление о проблемах с заказом отправлено оператору";
@@ -56,4 +59,6 @@ public interface Constants {
 
     boolean IS_UI_REFRESH_ENABLED = false;
     boolean IS_SHOW_MSG_PROVIDER_CHANGED = false;
+
+    String google_api_key = "AIzaSyDL3x6fuef-LHFGqipd_itXaO4xwQevoYA";
 }
