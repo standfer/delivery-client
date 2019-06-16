@@ -56,4 +56,6 @@ public interface Constants {
 
     boolean IS_UI_REFRESH_ENABLED = false;
     boolean IS_SHOW_MSG_PROVIDER_CHANGED = false;
+
+    String google_api_key = "todo input google_api_key here";
 }
