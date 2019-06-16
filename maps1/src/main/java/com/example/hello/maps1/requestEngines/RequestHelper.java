@@ -1,5 +1,6 @@
 package com.example.hello.maps1.requestEngines;
 
+import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
@@ -81,9 +82,16 @@ public class RequestHelper {
     public static String requestRouteByCoordinates(Coordinate origin, Coordinate destination) {
         HttpURLConnection connection = null;
         try {
-            URL url = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.getLat() + "," + origin.getLng() +
-                    "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key");
+            URL url = new URL(String.format(
+                    "https://maps.googleapis.com/maps/api/directions/json?origin=%s,%s" +
+                    "&destination=%s,%s" +
+                    "&departure_time=now&traffic_model=best_guess&key=%s",
+                    origin.getLat(),
+                    origin.getLng(),
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+                    ));
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
             InputStream in = new BufferedInputStream(connection.getInputStream());//);url.openStream()
@@ -116,8 +124,13 @@ public class RequestHelper {
             if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
             }
-            urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
+            urlBuilder += String.format("&destination=%s,%s" +
+                    "&departure_time=now&traffic_model=best_guess&key=%s",
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+            );
+
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -144,8 +157,12 @@ public class RequestHelper {
                 urlBuilder += urlBuilder.indexOf("waypoints") == -1 ? "&waypoints=via:" : "|";
                 urlBuilder += String.format("%s,%s", waypoint.getLng(), waypoint.getLat());
             }
-            urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
+            urlBuilder += String.format("&destination=%s,%s" +
+                            "&departure_time=now&traffic_model=best_guess&key=%s",
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+            );
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -181,8 +198,12 @@ public class RequestHelper {
             if (destination == null || destination.getLat() == 0 || destination.getLng() == 0) {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
             }
-            urlBuilder += "&destination=" + destination.getLat() + "," + destination.getLng() +
-                    "&departure_time=now&traffic_model=best_guess&key=google_api_key";
+            urlBuilder += String.format("&destination=%s,%s" +
+                            "&departure_time=now&traffic_model=best_guess&key=%s",
+                    destination.getLat(),
+                    destination.getLng(),
+                    Constants.google_api_key
+            );
             URL url = new URL(urlBuilder);
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
