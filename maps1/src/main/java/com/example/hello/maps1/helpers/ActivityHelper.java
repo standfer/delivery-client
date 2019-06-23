@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -209,5 +212,14 @@ public class ActivityHelper {
                 Uri.parse("package:" + context.getPackageName()));
 
         return intent;
+    }
+
+    public static void startWhiteListAddingActivities(Context context) {
+        context.startActivity(ActivityHelper.getWhiteListIntent(context));
+
+        ComponentName mDeviceAdmin = new ComponentName(context, DeviceAdminReceiver.class);
+        Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
+        context.startActivity(intent);
     }
 }

@@ -2,13 +2,10 @@ package com.example.hello.maps1.listeners.impl;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
-import com.example.hello.maps1.constants.Constants;
-import com.example.hello.maps1.helpers.ToolsHelper;
+import com.example.hello.maps1.helpers.LogHelper;
 import com.example.hello.maps1.listeners.BtnCallListener;
 
 /**
@@ -16,6 +13,7 @@ import com.example.hello.maps1.listeners.BtnCallListener;
  */
 
 public class BtnCallListenerImpl implements BtnCallListener {
+    private static final String TAG = BtnCallListenerImpl.class.getSimpleName();
     private Activity activity;
     private Context context;
     private String phoneNumber;
@@ -28,14 +26,16 @@ public class BtnCallListenerImpl implements BtnCallListener {
 
     @Override
     public void onClick(View v) {
-        Toast toast = Toast.makeText(context, "", Toast.LENGTH_LONG);
+        //Toast toast = Toast.makeText(context, "", Toast.LENGTH_LONG);
         //ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
         try {
-            Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
-            activity.startActivity(callIntent);
+            //Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
+            //activity.startActivity(callIntent);
+            LogHelper.sendLogsEmail(context);
         }
         catch (SecurityException ex) {
-            ToolsHelper.showMsgToUser(Constants.MSG_CALL_FORBIDDEN, toast);
+            Log.d(TAG, "Unable to send logs\n" + ex.getMessage());
+            //ToolsHelper.showMsgToUser(Constants.MSG_CALL_FORBIDDEN, toast);
         }
     }
 }

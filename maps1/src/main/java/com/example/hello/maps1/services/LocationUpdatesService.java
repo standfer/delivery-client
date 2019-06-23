@@ -1,12 +1,12 @@
 /**
  * Copyright 2017 Google Inc. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,10 +37,10 @@ import android.util.Log;
 
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
-import com.example.hello.maps1.asyncEngines.LocationUpdater;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.helpers.ActivityHelper;
+import com.example.hello.maps1.helpers.ToolsHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -73,6 +73,7 @@ public class LocationUpdatesService extends Service {
             "com.google.android.gms.location.sample.locationupdatesforegroundservice";
 
     private static final String TAG = LocationUpdatesService.class.getSimpleName();
+    public static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
 
     /**
      * The name of the channel for notifications.
@@ -176,8 +177,7 @@ public class LocationUpdatesService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service started");
         if (intent == null || intent.getExtras() == null) return START_STICKY;
-
-        this.courier = (Courier) ActivityHelper.getFromIntent(intent, Courier.class);
+        updateCourierIfNeed(intent);
 
         boolean startedFromNotification = intent.getBooleanExtra(EXTRA_STARTED_FROM_NOTIFICATION,
                 false);
@@ -189,6 +189,20 @@ public class LocationUpdatesService extends Service {
         }
         // Tells the system to not try to recreate the service after it has been killed.
         return START_NOT_STICKY;
+    }
+
+    protected void updateCourierIfNeed(Intent intent) {
+        if (intent == null) {//todo check and remove later if not need)
+            if (this.courier == null) {
+                this.courier = new Courier(10, "Yuri", 1);
+            }
+            return;
+        }
+
+        Courier courier = (Courier) ActivityHelper.getFromIntent(intent, Courier.class);
+        if (courier != null) {
+            this.courier = courier;
+        }
     }
 
     @Override
@@ -203,6 +217,7 @@ public class LocationUpdatesService extends Service {
         // and binds with this service. The service should cease to be a foreground service
         // when that happens.
         Log.i(TAG, "in onBind()");
+        updateCourierIfNeed(intent);
         stopForeground(true);
         mChangingConfiguration = false;
         return mBinder;
@@ -214,6 +229,7 @@ public class LocationUpdatesService extends Service {
         // and binds once again with this service. The service should cease to be a foreground
         // service when that happens.
         Log.i(TAG, "in onRebind()");
+        updateCourierIfNeed(intent);
         stopForeground(true);
         mChangingConfiguration = false;
         super.onRebind(intent);
@@ -226,7 +242,7 @@ public class LocationUpdatesService extends Service {
         // Called when the last client (MainActivity in case of this sample) unbinds from this
         // service. If this method is called due to a configuration change in MainActivity, we
         // do nothing. Otherwise, we make this service a foreground service.
-        if (!mChangingConfiguration) {
+        if (!mChangingConfiguration && ToolsHelper.isRequestingLocationUpdates(this)) {
             Log.i(TAG, "Starting foreground service");
 
             startForeground(NOTIFICATION_ID, getNotification());
@@ -245,14 +261,16 @@ public class LocationUpdatesService extends Service {
      */
     public void requestLocationUpdates(Context context) {
         //if (ActivityHelper.isMyServiceRunning(context, LocationUpdater.class)) {
-            Log.i(TAG, "Requesting location updates");
-            startService(new Intent(getApplicationContext(), LocationUpdatesService.class));
-            try {
-                mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                        mLocationCallback, Looper.myLooper());
-            } catch (SecurityException unlikely) {
-                Log.e(TAG, "Lost location permission. Could not request updates. " + unlikely);
-            }
+        Log.i(TAG, "Requesting location updates");
+        ToolsHelper.setRequestingLocationUpdates(this, true);
+        startService(new Intent(getApplicationContext(), LocationUpdatesService.class));
+        try {
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback, Looper.myLooper());
+        } catch (SecurityException unlikely) {
+            ToolsHelper.setRequestingLocationUpdates(this, false);
+            Log.e(TAG, "Lost location permission. Could not request updates. " + unlikely);
+        }
         //}
     }
 
@@ -264,8 +282,10 @@ public class LocationUpdatesService extends Service {
         Log.i(TAG, "Removing location updates");
         try {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+            ToolsHelper.setRequestingLocationUpdates(this, false);
             stopSelf();
         } catch (SecurityException unlikely) {
+            ToolsHelper.setRequestingLocationUpdates(this, true);
             Log.e(TAG, "Lost location permission. Could not remove updates. " + unlikely);
         }
     }
@@ -287,10 +307,12 @@ public class LocationUpdatesService extends Service {
         PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainMapsActivity.class), 0);
 
+        String notificationText = ToolsHelper.getLocationLastUpdate(getApplicationContext());
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(Constants.SERVICE_NOTIFICATION_TITLE)
-                .setContentText(Constants.SERVICE_NOTIFICATION_TEXT)
-                .setTicker(Constants.SERVICE_NOTIFICATION_TEXT)
+                .setContentText(notificationText)
+                .setTicker(notificationText)
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -326,9 +348,7 @@ public class LocationUpdatesService extends Service {
         Log.i(TAG, "New location: " + location);
 
         mLocation = location;
-        if (courier == null) {
-            courier = new Courier(7, "Vasya", 1);
-        }
+        updateCourierIfNeed(null);
         courier.setCurrentCoordinate(location);
         courier.requestDataFromServer();//todo check npe
 

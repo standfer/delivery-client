@@ -188,7 +188,7 @@
             android:background="@android:color/holo_orange_light"
             android:checked="false"
             android:onClick="onClickBtnCall"
-            android:text="Включить отслеживание"
+            android:text="@string/btnCall_caption"
             android:visibility="visible"></Button>
     </RelativeLayout>
 

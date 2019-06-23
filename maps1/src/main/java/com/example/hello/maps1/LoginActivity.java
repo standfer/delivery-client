@@ -12,6 +12,7 @@ import android.widget.EditText;
 import com.example.hello.maps1.asyncEngines.CredentialsLoader;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.helpers.ActivityHelper;
+import com.example.hello.maps1.helpers.LogHelper;
 import com.example.hello.maps1.services.TrackingService;
 import com.rohitss.uceh.UCEHandler;
 
@@ -40,6 +41,7 @@ public class LoginActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         new UCEHandler.Builder(this).build();
+        LogHelper.createLogFile();
 
         setContentView(R.layout.activity_login);
 

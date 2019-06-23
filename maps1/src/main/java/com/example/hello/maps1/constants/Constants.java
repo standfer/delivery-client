@@ -40,7 +40,7 @@ public interface Constants {
     String METHOD_NAME_assignOrdersToCourier = "assignOrdersToCourier";
     String METHOD_NAME_setOrdersAssigned = "setOrdersAssigned";
 
-    Integer REQUEST_CODE_PERMISSION_ALL = 0;
+    Integer REQUEST_CODE_PERMISSION_ALL = 34;
 
     Long TIMEOUT_COURIER_ASSIGNMENT = 30000L;
     double PROXIMITY_ALERT_RADIUS = 300;

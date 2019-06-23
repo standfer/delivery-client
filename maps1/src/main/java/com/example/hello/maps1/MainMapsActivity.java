@@ -1,22 +1,20 @@
 package com.example.hello.maps1;
 
 import android.Manifest;
-import android.app.admin.DeviceAdminReceiver;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.IBinder;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,9 +40,7 @@ import com.example.hello.maps1.services.LocationUpdatesService;
 import com.example.hello.maps1.services.TrackingService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.nullwire.trace.ExceptionHandler;
@@ -53,11 +49,15 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity implements OnMapReadyCallback {
+public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
+    private static final String TAG = MainMapsActivity.class.getSimpleName();
     protected Intent trackingIntent;
 
     private GoogleMap mMap;
@@ -103,6 +103,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             LocationUpdatesService.LocalBinder binder = (LocationUpdatesService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
+            mService.requestLocationUpdates(getApplicationContext());
         }
 
         @Override
@@ -113,6 +114,8 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     };
 
     private void initGUI() {
+        toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
+
         btnCall = (Button) findViewById(R.id.btnCall);
         btnHelp = (Button) findViewById(R.id.btnHelp);
         btnLogout = (Button) findViewById(R.id.btnLogout);
@@ -152,9 +155,9 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             }
         });
 
-        //btnCall.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
+        btnCall.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
 
-        btnCall.setOnClickListener(new View.OnClickListener() {
+        /*btnCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
@@ -166,7 +169,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
                     mService.removeLocationUpdates();
                 }
             }
-        });
+        });*/
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -232,12 +235,19 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         int permissionWakeLockStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK);
         int permissionForegroundStatus = ContextCompat.checkSelfPermission(this, "android.permission.FOREGROUND_SERVICE");
 
+        int permissionReadLogsStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_LOGS);
+        int permissionReadExternalStorageStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        int permissionWriteExternalStorageStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
         if (permissionLocationStatus != PackageManager.PERMISSION_GRANTED ||
                 permissionCoarceLocationStatus != PackageManager.PERMISSION_GRANTED ||
                 permissionCallPhoneStatus != PackageManager.PERMISSION_GRANTED ||
                 permissionInternetStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionWakeLockStatus != PackageManager.PERMISSION_GRANTED
-                || permissionForegroundStatus != PackageManager.PERMISSION_GRANTED
+                permissionWakeLockStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionReadLogsStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionReadExternalStorageStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionWriteExternalStorageStatus != PackageManager.PERMISSION_GRANTED ||
+                permissionForegroundStatus != PackageManager.PERMISSION_GRANTED
         ) {
 
             ActivityCompat.requestPermissions(this, new String[]
@@ -247,6 +257,9 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
                             Manifest.permission.CALL_PHONE,
                             Manifest.permission.INTERNET,
                             Manifest.permission.WAKE_LOCK,
+                            Manifest.permission.READ_LOGS,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             "android.permission.FOREGROUND_SERVICE"
 
                     }, Constants.REQUEST_CODE_PERMISSION_ALL);
@@ -297,18 +310,12 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         myReceiver = new MyReceiver();
+
         try {
             ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
-            startActivity(ActivityHelper.getWhiteListIntent(getApplicationContext()));
-            ComponentName mDeviceAdmin = new ComponentName(this, DeviceAdminReceiver.class);
+            ActivityHelper.startWhiteListAddingActivities(this);
 
-            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
-
-            startActivity(intent);
-
-
-            this.mainMapsActivity = this;
+            this.mainMapsActivity = this; //todo check if we need just send this instead of mainMapsActivity
             isRouteNeed = true;
             setContentView(R.layout.activity_main_maps);
 
@@ -319,15 +326,8 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
             initGUI();
 
-            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
-
             idCourier = getIntent().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
             courier = new Courier(idCourier, "Vasya", 1);
-
-            Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
-            ActivityHelper.putToIntent(locationUpdateIntent, courier);
-            bindService(locationUpdateIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
             //ActivityHelper.startTrackingService(this, courier);
             //ActivityHelper.startService(getApplicationContext(), courier, TrackingService.class);
@@ -362,14 +362,15 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     @Override
     protected void onStart() {
         super.onStart();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
 
         Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
         ActivityHelper.putToIntent(locationUpdateIntent, courier);
-        bindService(locationUpdateIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE);
+        bindService(locationUpdateIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
-        if (mService != null) {
-            mService.requestLocationUpdates(getApplicationContext());
+        if (mService != null && !ToolsHelper.isRequestingLocationUpdates(this)) {
+            mService.requestLocationUpdates(this);
         }
     }
 
@@ -380,12 +381,12 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
                 new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
 
-        if (Constants.IS_UI_REFRESH_ENABLED) {
+        if (Constants.IS_UI_REFRESH_ENABLED && locationManager != null) {
             try {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener);
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
 
-                checkEnabled();
+                //checkEnabled();
 
             } catch (SecurityException ex) {
                 ex.printStackTrace();
@@ -395,13 +396,27 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     @Override
     protected void onPause() throws SecurityException {
-        super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
         if (locationManager != null) locationManager.removeUpdates(locationListener);
+        super.onPause();
     }
-    /**
-     * Receiver for broadcasts sent by {@link LocationUpdatesService}.
-     */
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.i(TAG, "onRequestPermissionResult");
+        if (requestCode == Constants.REQUEST_CODE_PERMISSION_ALL && grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && mService != null) {
+                mService.requestLocationUpdates(this);
+            } else {
+                initPermissions();
+            }
+        }
+    }
+
     private class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -518,7 +533,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         }, 1000, 5000);
     }
 
-    private LocationListener locationListener = new LocationListener() { //TODO NOT FORGOT ABOUT PERMISSIONS FOR MAPS1 IN PHONE/SECURITY
+    private LocationListener locationListener = null; /*new LocationListener() { //TODO NOT FORGOT ABOUT PERMISSIONS FOR MAPS1 IN PHONE/SECURITY
         @Override
         public void onLocationChanged(Location location) {
             try {
@@ -539,17 +554,6 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         }
 
         @Override
-        public void onProviderDisabled(String provider) {
-            checkEnabled();
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) throws SecurityException {
-            /*checkEnabled();
-            showLocation(locationManager.getLastKnownLocation(provider));*/
-        }
-
-        @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             if (Constants.IS_SHOW_MSG_PROVIDER_CHANGED) {
                 if (provider.equals(LocationManager.GPS_PROVIDER)) {
@@ -560,7 +564,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
                 toast.show();
             }
         }
-    };
+    };*/
 
     private boolean isGpsLocation(Location location) {
         return location != null ? location.getProvider().equals(LocationManager.GPS_PROVIDER) : false;
@@ -625,15 +629,13 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     @Override
     protected void onStop() {
-        Log.i(MainMapsActivity.class.getSimpleName(), "onStop!");
+        Log.i(TAG, "onStop!");
         if (mBound) {
-            // Unbind from the service. This signals to the service that this activity is no longer
-            // in the foreground, and the service can respond by promoting itself to a foreground
-            // service.
             unbindService(mServiceConnection);
             mBound = false;
         }
 
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onStop();
     }
 
@@ -641,7 +643,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     protected void onDestroy() {
         super.onDestroy();
 
-        if (locationManager != null) locationManager.removeUpdates(locationListener);
+        if (locationManager != null) locationManager.removeUpdates(locationListener);//todo think mb this is the reason of not sending problems, cause while go to foreground service onDestroy may be called before
     }
 
     public Marker getMrkCurrentPos() {
