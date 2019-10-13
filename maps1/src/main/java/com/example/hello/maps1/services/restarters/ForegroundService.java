@@ -36,7 +36,7 @@ public class ForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(ForegroundService.class.getSimpleName(), "Foreground service onStartCommand!!");
+        Log.i(ForegroundService.class.getName(), "Foreground service onStartCommand!!");
         super.onStartCommand(intent, flags, startId);
         if (intent.getExtras() == null) return START_STICKY;
 
@@ -60,7 +60,7 @@ public class ForegroundService extends Service {
             while(true) {
                 try {
                     Thread.sleep(1000);
-                    Log.i(ForegroundService.class.getSimpleName(), "Current dateTime: " + new DateTime());
+                    Log.i(ForegroundService.class.getName(), "Current dateTime: " + new DateTime());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

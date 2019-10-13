@@ -59,9 +59,9 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
         Bundle parameters = getIntent().getExtras();
         if (parameters == null) return;
 
-        order = (Order) parameters.getSerializable(Order.class.getSimpleName());
+        order = (Order) parameters.getSerializable(Order.class.getName());
         client = order.getClient();
-        courier = (Courier) parameters.getSerializable(Courier.class.getSimpleName());
+        courier = (Courier) parameters.getSerializable(Courier.class.getName());
 
         initGui();
         initData();

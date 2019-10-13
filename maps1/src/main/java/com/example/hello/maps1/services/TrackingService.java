@@ -32,7 +32,7 @@ public class TrackingService extends Service {
 
     public TrackingService(Context applicationContext) {
         super();
-        Log.i(TrackingService.class.getSimpleName(), "Tracking service constructor");
+        Log.i(TrackingService.class.getName(), "Tracking service constructor");
     }
 
     public TrackingService() {
@@ -45,7 +45,7 @@ public class TrackingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TrackingService.class.getSimpleName(), "Tracking service onStartCommand!!");
+        Log.i(TrackingService.class.getName(), "Tracking service onStartCommand!!");
         super.onStartCommand(intent, flags, startId);
         if (intent == null || intent.getExtras() == null) return START_STICKY;
 
@@ -72,13 +72,13 @@ public class TrackingService extends Service {
 
     @Override
     public boolean stopService(Intent name) {
-        Log.i(TrackingService.class.getSimpleName(), "Tracking service onStop!!");
+        Log.i(TrackingService.class.getName(), "Tracking service onStop!!");
         return super.stopService(name);
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.i(TrackingService.class.getSimpleName(), "Tracking service onTaskRemoved!!");
+        Log.i(TrackingService.class.getName(), "Tracking service onTaskRemoved!!");
         super.onTaskRemoved(rootIntent);
         /*isTaskRemovedProcessed = true;
 
@@ -94,7 +94,7 @@ public class TrackingService extends Service {
         if (!isTaskRemovedProcessed && !isNeedToClose) {
             restartService();
         }*/
-        Log.i(TrackingService.class.getSimpleName(), "Tracking service onDestroy!!");
+        Log.i(TrackingService.class.getName(), "Tracking service onDestroy!!");
         super.onDestroy();
     }
 
@@ -110,7 +110,7 @@ public class TrackingService extends Service {
     }
 
     public void close() {
-        Log.i(TrackingService.class.getSimpleName(), "Tracking service onDestroy!!");
+        Log.i(TrackingService.class.getName(), "Tracking service onDestroy!!");
         this.isNeedToClose = true;
         this.stopSelf();
     }

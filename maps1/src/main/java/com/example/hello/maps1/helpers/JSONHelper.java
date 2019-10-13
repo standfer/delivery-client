@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.entities.responses.Infos;
-import com.example.hello.maps1.entities.responses.OrdersResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -17,6 +16,8 @@ import java.io.StringWriter;
  */
 
 public class JSONHelper {
+    public static final String TAG = JSONHelper.class.getName();
+
     public static String getJsonFromObject(Object object) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -28,7 +29,7 @@ public class JSONHelper {
 
             return stringObj.toString();
         } catch (IOException e) {
-            Log.d("ConvertObjectToJson", String.format("Object %s converting to json failed", object.getClass()));
+            Log.d(TAG, String.format("Object %s converting to json failed", object.getClass()));
             //e.printStackTrace();
             return "";
         }

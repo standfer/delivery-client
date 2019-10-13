@@ -35,6 +35,7 @@ import com.example.hello.maps1.helpers.ActivityHelper;
 import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
+import com.example.hello.maps1.listeners.impl.BtnSendLogsListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
 import com.example.hello.maps1.services.LocationUpdatesService;
 import com.example.hello.maps1.services.TrackingService;
@@ -57,7 +58,7 @@ import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
-    private static final String TAG = MainMapsActivity.class.getSimpleName();
+    protected static final String TAG = MainMapsActivity.class.getName();
     protected Intent trackingIntent;
 
     private GoogleMap mMap;
@@ -81,7 +82,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     private LocationUpdatesService mService = null;
 
     //GUI
-    private Button btnHelp, btnCall, btnManualMove, btnMoveToNextOrder, btnLogout;
+    private Button btnHelp, btnCall, btnSendLogs, btnManualMove, btnMoveToNextOrder, btnLogout;
     private Button btnOrder1, btnOrder2, btnOrder3, btnOrder4;
     private ImageButton btnFullScreen;
 
@@ -100,6 +101,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "Location service connected");
             LocationUpdatesService.LocalBinder binder = (LocationUpdatesService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
@@ -108,6 +110,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "Location service disconnected");
             mService = null;
             mBound = false;
         }
@@ -117,6 +120,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
 
         btnCall = (Button) findViewById(R.id.btnCall);
+        btnSendLogs = (Button) findViewById(R.id.btnSendLogs);
         btnHelp = (Button) findViewById(R.id.btnHelp);
         btnLogout = (Button) findViewById(R.id.btnLogout);
         btnManualMove = (Button) findViewById(R.id.btnManualMove);
@@ -141,7 +145,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         btnManualMove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("Location", String.format("Courier coordinates changed"));
+                Log.d(TAG, String.format("Courier coordinates changed"));
                 //workaround if current position could not be find, must be deleted
                 /*if (courier != null && courier.getCurrentCoordinate() == null) {
                     courier.setCurrentCoordinate(new Coordinate(53.144657,50.0168557));
@@ -156,6 +160,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         });
 
         btnCall.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
+        btnSendLogs.setOnClickListener(new BtnSendLogsListenerImpl(this, getApplicationContext()));
 
         /*btnCall.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -249,7 +254,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
                 permissionWriteExternalStorageStatus != PackageManager.PERMISSION_GRANTED ||
                 permissionForegroundStatus != PackageManager.PERMISSION_GRANTED
         ) {
-
+            Log.d(TAG, "Permissions requested");
             ActivityCompat.requestPermissions(this, new String[]
                     {
                             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -310,6 +315,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         myReceiver = new MyReceiver();
+        Log.d(TAG, "MainMapsActivity created");
 
         try {
             ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
@@ -407,7 +413,7 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.i(TAG, "onRequestPermissionResult");
+        Log.i(TAG, "Requesting permissions result");
         if (requestCode == Constants.REQUEST_CODE_PERMISSION_ALL && grantResults.length > 0) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED && mService != null) {
                 mService.requestLocationUpdates(this);
@@ -420,8 +426,10 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     private class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Receive location by broadcastReceiver");
             Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
             if (location != null) {
+                Log.d(TAG, "Received successfully location by broadcastReceiver");
                 Toast.makeText(MainMapsActivity.this, ToolsHelper.getLocationText(location),
                         Toast.LENGTH_SHORT).show();
             }

@@ -2,10 +2,11 @@ package com.example.hello.maps1.listeners.impl;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 
-import com.example.hello.maps1.helpers.LogHelper;
 import com.example.hello.maps1.listeners.BtnCallListener;
 
 /**
@@ -13,7 +14,7 @@ import com.example.hello.maps1.listeners.BtnCallListener;
  */
 
 public class BtnCallListenerImpl implements BtnCallListener {
-    private static final String TAG = BtnCallListenerImpl.class.getSimpleName();
+    private static final String TAG = BtnCallListenerImpl.class.getName();
     private Activity activity;
     private Context context;
     private String phoneNumber;
@@ -29,9 +30,8 @@ public class BtnCallListenerImpl implements BtnCallListener {
         //Toast toast = Toast.makeText(context, "", Toast.LENGTH_LONG);
         //ToolsHelper.showMsgToUser(Constants.MSG_ORDER_PROBLEMS, toast);
         try {
-            //Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
-            //activity.startActivity(callIntent);
-            LogHelper.sendLogsEmail(context);
+            Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
+            activity.startActivity(callIntent);
         }
         catch (SecurityException ex) {
             Log.d(TAG, "Unable to send logs\n" + ex.getMessage());

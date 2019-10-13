@@ -28,5 +28,6 @@
     <string name="location_updated">%1$s: обновлены координаты</string>
 
     <!--UI todo move here all ui captions-->
-    <string name="btnCall_caption">Отправить логи</string>
+    <string name="btnCall_caption">Позвонить оператору</string>
+    <string name="btnSendLogs_caption">Отправить логи</string>
 </resources>

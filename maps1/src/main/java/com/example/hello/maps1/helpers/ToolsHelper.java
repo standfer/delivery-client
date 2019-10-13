@@ -23,6 +23,7 @@ import static com.example.hello.maps1.services.LocationUpdatesService.KEY_REQUES
  */
 
 public class ToolsHelper {
+    protected static final String TAG = ToolsHelper.class.getName();
 
     public static void showMsgToUser(String msg, Toast toast) {
         toast.setText(msg);
@@ -30,7 +31,7 @@ public class ToolsHelper {
     }
 
     public static void logException(Throwable ex) {
-        Log.d("Unknown exception", ex.toString());
+        Log.d(TAG, ex.toString());
         //throw new RuntimeException("Unknown exception", ex);//todo show error to user
     }
 

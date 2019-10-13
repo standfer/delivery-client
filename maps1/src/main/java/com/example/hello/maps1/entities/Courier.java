@@ -27,7 +27,6 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +38,8 @@ import java.util.List;
 public class Courier
         extends BaseEntity
         implements Serializable, Cloneable {
+    protected static final String TAG = Courier.class.getName();
+
     private String name;
     private String surName;
     private Long phone;
@@ -275,7 +276,7 @@ public class Courier
                 }
             }
 
-            Log.d("Courier", String.format("Update courier.orders (%s)", !CollectionsHelper.isEmpty(orders) ? orders.toString() + ":" + orders.size() : null));
+            Log.d(TAG, String.format("Update courier.orders (%s)", !CollectionsHelper.isEmpty(orders) ? orders.toString() + ":" + orders.size() : null));
 
             if (!StringHelper.isEmpty(responseOrdersUnassigned)) {
                 Infos infosUnassigned = (Infos) JSONHelper.getObjectFromJson(responseOrdersUnassigned, Infos.class);
@@ -290,7 +291,7 @@ public class Courier
                     checkOrdersAvailable(this.ordersAvailable);
                 }
 
-                Log.d("Courier", String.format("Update courier.ordersAvailable (%s)", !CollectionsHelper.isEmpty(ordersAvailable) ? ordersAvailable.toString() + ":" + ordersAvailable.size() : null));
+                Log.d(TAG, String.format("Update courier.ordersAvailable (%s)", !CollectionsHelper.isEmpty(ordersAvailable) ? ordersAvailable.toString() + ":" + ordersAvailable.size() : null));
             }
         } catch (Throwable ex) {
             ToolsHelper.logException(ex);

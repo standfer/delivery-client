@@ -19,7 +19,7 @@ public class DeliveryLocationListener implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         try {
-            Log.i(TrackingService.class.getSimpleName(), DeliveryLocationListener.class + " service onLocationChanged");
+            Log.i(TrackingService.class.getName(), DeliveryLocationListener.class + " service onLocationChanged");
                 Coordinate changedLocation = new Coordinate(location);
 
                 courier.setCurrentCoordinate(changedLocation);

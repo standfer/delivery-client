@@ -51,13 +51,13 @@ public class LoginActivity extends FragmentActivity {
 
     @Override
     protected void onPause() {
-        Log.i(LoginActivity.class.getSimpleName(), "LoginActivity onPause!");
+        Log.d(LoginActivity.class.getName(), "LoginActivity onPause!");
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        Log.i(LoginActivity.class.getSimpleName(), "LoginActivity onStop!");
+        Log.d(LoginActivity.class.getName(), "LoginActivity onStop!");
         super.onStop();
     }
 
@@ -126,7 +126,7 @@ public class LoginActivity extends FragmentActivity {
         if (trackingIntent != null) {
             stopService(trackingIntent);
         }
-        Log.i(LoginActivity.class.getSimpleName(), "onDestroy!");
+        Log.d(LoginActivity.class.getName(), "onDestroy!");
         super.onDestroy();
     }
 

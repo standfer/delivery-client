@@ -33,6 +33,7 @@ import java.util.List;
  * Created by Lyubov_Kutergina on 31.01.2016. // not used now, instead of - MyIntentService
  */
 public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Courier> {//<String, Void, String> {
+    protected static final String TAG = NetworkDAO.class.getName();
 
     public String answerOldBridge = "", answerNewBridge = "", responseRouteData = "";
     private String answerLocalhost = "";
@@ -84,7 +85,7 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Courier> {//<S
                 Log.e("Request", String.format(Constants.ERROR_NO_DATA_FOR_COURIER, courier.getId()));
             }*/
         } catch (Throwable e) {
-            Log.d("Request Error", e.getStackTrace().toString());
+            Log.d(TAG, e.getStackTrace().toString());
         }
 
         /*List<Order> testOrders = new ArrayList<>();
@@ -154,7 +155,7 @@ public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Courier> {//<S
                 NotificationHelper.showNotification(mainMapsActivity, Constants.MSG_ORDER_TITLE, Constants.MSG_ORDER_IS_DELIVERED);
             }
         } catch (Throwable ex) {
-            Log.d("IsDelivered failed", ex.toString());
+            Log.d(TAG, "IsDelivered failed, ex: " + ex.toString());
         }
     }
 

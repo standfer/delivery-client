@@ -3,8 +3,14 @@ package com.example.hello.maps1.helpers;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.FileUriExposedException;
+import android.os.StrictMode;
 import android.util.Log;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LogHelper {
-    public static final String TAG = LogHelper.class.getSimpleName();
+    public static final String TAG = LogHelper.class.getName();
 
     public static void createLogFile() {
         try {
@@ -20,7 +26,7 @@ public class LogHelper {
 
                 File appDirectory = new File(Environment.getExternalStorageDirectory() + "/Log_Delivery");
                 File logDirectory = new File(appDirectory + "/log");
-                File logFile = new File(logDirectory, "logcat" + System.currentTimeMillis() + ".txt");
+                File logFile = new File(logDirectory, "logcat_" + DateTimeFormat.forPattern("YYYY-MM-dd_HH_mm").print(new DateTime()) + ".log");
 
                 // create app folder
                 if (!appDirectory.exists()) {
@@ -70,9 +76,11 @@ public class LogHelper {
     }
 
     public static void sendLogsEmail(Context context) {
+        Intent emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         try {
+            createLogFile();//todo wait for log creating
+            Thread.sleep(5000);
             //send file using email
-            Intent emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
             // Set type to "email"
             emailIntent.setType("vnd.android.cursor.dir/email");
             String to[] = {"standfer231@gmail.com"};
@@ -83,7 +91,16 @@ public class LogHelper {
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
             context.startActivity(Intent.createChooser(emailIntent, "Send email..."));
         } catch (Throwable ex) {
-            Log.e(TAG, "Failed to send logs to email");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && ex instanceof FileUriExposedException) {
+                Log.e(TAG, "Failed to open email activity. Trying to open activity in strict mode", ex);
+                try {
+                    enableStrictMode();
+                    context.startActivity(Intent.createChooser(emailIntent, "Send email..."));
+                } catch (Throwable e) {
+                    Log.e(TAG, "Failed to send logs to email", e);
+                }
+            }
+            Log.e(TAG, "Failed to send logs to email", ex);
         }
     }
 
@@ -113,5 +130,10 @@ public class LogHelper {
         }
 
         return filePaths;
+    }
+
+    public static void enableStrictMode() { //for not creating signature and uri.fileProvider (https://stackoverflow.com/questions/48117511/exposed-beyond-app-through-clipdata-item-geturi?rq=1)
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
     }
 }

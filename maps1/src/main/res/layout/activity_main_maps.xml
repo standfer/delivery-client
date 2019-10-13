@@ -189,7 +189,23 @@
             android:checked="false"
             android:onClick="onClickBtnCall"
             android:text="@string/btnCall_caption"
-            android:visibility="visible"></Button>
+            android:visibility="invisible">
+        </Button>
+        <Button
+            android:id="@+id/btnSendLogs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="@android:color/holo_orange_light"
+            android:checked="false"
+            android:onClick="onClickBtnSendLogs"
+            android:text="@string/btnSendLogs_caption"
+            android:visibility="visible">
+        </Button>
     </RelativeLayout>
 
     <LinearLayout

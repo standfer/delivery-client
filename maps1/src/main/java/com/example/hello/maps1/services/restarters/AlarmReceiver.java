@@ -12,7 +12,7 @@ import com.example.hello.maps1.services.TrackingService;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TrackingRestarterBroadcastReceiver.class.getSimpleName(), "AlarmReceiver onReceive");
+        Log.i(TrackingRestarterBroadcastReceiver.class.getName(), "AlarmReceiver onReceive");
         Courier courier = (Courier) ActivityHelper.getFromIntentBytes(intent, Courier.class);
 
         ActivityHelper.startService(context, courier, TrackingService.class);

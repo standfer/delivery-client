@@ -9,6 +9,8 @@ import com.example.hello.maps1.helpers.JSONHelper;
 import com.example.hello.maps1.requestEngines.RequestHelper;
 
 public class LocationUpdater extends AsyncTask<Courier, Void, Courier> {
+    public static final String TAG = LocationUpdater.class.getName();
+
     private Courier courierMain;
     private String responseCourierData = "", responseOrdersUnassignedData = "";
     private String responseRouteData = "";
@@ -36,7 +38,7 @@ public class LocationUpdater extends AsyncTask<Courier, Void, Courier> {
                 Log.e("Request", String.format(Constants.ERROR_NO_DATA_FOR_COURIER, courier.getId()));
             }*/
         } catch (Throwable e) {
-            Log.d("Request Error", e.getStackTrace().toString());
+            Log.d(TAG, e.getStackTrace().toString());
         }
 
         return null;

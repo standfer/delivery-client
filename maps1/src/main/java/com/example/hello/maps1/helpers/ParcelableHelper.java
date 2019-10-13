@@ -46,12 +46,12 @@ public class ParcelableHelper {
             bytesArray = bos.toByteArray();
         } catch (IOException ex) {
             ex.printStackTrace();
-            Log.i(ParcelableHelper.class.getSimpleName(), ex.toString());
+            Log.d(ParcelableHelper.class.getName(), ex.toString());
         } finally {
             try {
                 bos.close();
             } catch (IOException ex) {
-                Log.i(ParcelableHelper.class.getSimpleName(), ex.toString());
+                Log.d(ParcelableHelper.class.getName(), ex.toString());
             }
         }
 
@@ -68,14 +68,14 @@ public class ParcelableHelper {
             object = in.readObject();
         } catch (Throwable ex) {
             ex.printStackTrace();
-            Log.i(ParcelableHelper.class.getSimpleName(), ex.toString());
+            Log.d(ParcelableHelper.class.getName(), ex.toString());
         } finally {
             try {
                 if (in != null) {
                     in.close();
                 }
             } catch (IOException ex) {
-                Log.i(ParcelableHelper.class.getSimpleName(), ex.toString());
+                Log.d(ParcelableHelper.class.getName(), ex.toString());
             }
         }
 

@@ -42,10 +42,10 @@ dependencies {
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
-
+//
     defaultConfig {
         applicationId "com.example.hello.maps1"
-        minSdkVersion 21
+        minSdkVersion 16
         targetSdkVersion 28
         // Enabling multidex support.
         multiDexEnabled true

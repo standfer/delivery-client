@@ -72,7 +72,7 @@ public class LocationUpdatesService extends Service {
     private static final String PACKAGE_NAME =
             "com.google.android.gms.location.sample.locationupdatesforegroundservice";
 
-    private static final String TAG = LocationUpdatesService.class.getSimpleName();
+    protected static final String TAG = LocationUpdatesService.class.getName();
     public static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
 
     /**
@@ -143,11 +143,13 @@ public class LocationUpdatesService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "LocationUpdatesService created");
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                Log.d(TAG, "LocationCallback received. LocationResult=" + locationResult);
                 super.onLocationResult(locationResult);
                 onNewLocation(locationResult.getLastLocation());
             }
@@ -165,6 +167,7 @@ public class LocationUpdatesService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.app_name);
             // Create the channel for the notification
+            Log.d(TAG, "Creating NotificationChannel: " + name);
             NotificationChannel mChannel =
                     new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
 
@@ -201,6 +204,7 @@ public class LocationUpdatesService extends Service {
 
         Courier courier = (Courier) ActivityHelper.getFromIntent(intent, Courier.class);
         if (courier != null) {
+            Log.d(TAG, "Update courier from parameter");
             this.courier = courier;
         }
     }
@@ -216,7 +220,7 @@ public class LocationUpdatesService extends Service {
         // Called when a client (MainActivity in case of this sample) comes to the foreground
         // and binds with this service. The service should cease to be a foreground service
         // when that happens.
-        Log.i(TAG, "in onBind()");
+        Log.d(TAG, "LocationUpdatesService in onBind()");
         updateCourierIfNeed(intent);
         stopForeground(true);
         mChangingConfiguration = false;
@@ -294,6 +298,7 @@ public class LocationUpdatesService extends Service {
      * Returns the {@link NotificationCompat} used as part of the foreground service.
      */
     private Notification getNotification() {
+        Log.d(TAG, "Get notification");
         Intent intent = new Intent(this, LocationUpdatesService.class);
 
         // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
@@ -332,6 +337,7 @@ public class LocationUpdatesService extends Service {
                     .addOnCompleteListener(new OnCompleteListener<Location>() {
                         @Override
                         public void onComplete(@NonNull Task<Location> task) {
+                            Log.d(TAG, "Get last location completed");
                             if (task.isSuccessful() && task.getResult() != null) {
                                 mLocation = task.getResult();
                             } else {
@@ -367,6 +373,7 @@ public class LocationUpdatesService extends Service {
      * Sets the location request parameters.
      */
     private void createLocationRequest() {
+        Log.d(TAG, "Create location request");
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);

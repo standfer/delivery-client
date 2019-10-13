@@ -16,7 +16,7 @@ import com.example.hello.maps1.services.TrackingService;
 public class TrackingRestarterBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TrackingRestarterBroadcastReceiver.class.getSimpleName(), "TrackingService stops! Oooooooooooooppppssssss!!!!");
+        Log.i(TrackingRestarterBroadcastReceiver.class.getName(), "TrackingService stops! Oooooooooooooppppssssss!!!!");
         Intent intentRestore = new Intent(new Intent(context, TrackingService.class));
         Courier courier = (Courier) ActivityHelper.getFromIntent(intent, Courier.class);
         ActivityHelper.putToIntent(intentRestore, courier);
