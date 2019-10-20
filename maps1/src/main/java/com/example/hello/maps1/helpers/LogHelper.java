@@ -20,13 +20,18 @@ import java.util.List;
 public class LogHelper {
     public static final String TAG = LogHelper.class.getName();
 
-    public static void createLogFile() {
+    public static void createLogFile(boolean isNeedClearLogs) {
+        createLogFile(isNeedClearLogs, null);
+    }
+
+    public static void createLogFile(boolean isNeedClearLogs, String fileNamePostfix) {
         try {
             if (isExternalStorageWritable()) {
-
                 File appDirectory = new File(Environment.getExternalStorageDirectory() + "/Log_Delivery");
                 File logDirectory = new File(appDirectory + "/log");
-                File logFile = new File(logDirectory, "logcat_" + DateTimeFormat.forPattern("YYYY-MM-dd_HH_mm").print(new DateTime()) + ".log");
+                File logFile = new File(logDirectory, String.format("logcat_%s%s.log",
+                        !StringHelper.isEmpty(fileNamePostfix) ? fileNamePostfix + "_" : "",
+                        DateTimeFormat.forPattern("YYYY-MM-dd_HH_mm").print(new DateTime())));
 
                 // create app folder
                 if (!appDirectory.exists()) {
@@ -40,8 +45,10 @@ public class LogHelper {
 
                 // clear the previous logcat and then write the new one to the file
                 try {
-                    Process process = Runtime.getRuntime().exec("logcat -c");
-                    process = Runtime.getRuntime().exec("logcat -f " + logFile);
+                    if (isNeedClearLogs) {
+                        Runtime.getRuntime().exec("logcat -c");
+                    }
+                    Runtime.getRuntime().exec("logcat -f " + logFile);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -78,7 +85,7 @@ public class LogHelper {
     public static void sendLogsEmail(Context context) {
         Intent emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         try {
-            createLogFile();//todo wait for log creating
+            createLogFile(false);//todo wait for log creating
             Thread.sleep(5000);
             //send file using email
             // Set type to "email"

@@ -317,6 +317,7 @@ public class LocationUpdatesService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(Constants.SERVICE_NOTIFICATION_TITLE)
                 .setContentText(notificationText)
+                .setContentIntent(getStandardActivityIntent())
                 .setTicker(notificationText)
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_HIGH)
@@ -329,6 +330,11 @@ public class LocationUpdatesService extends Service {
         }
 
         return builder.build();
+    }
+
+    private PendingIntent getStandardActivityIntent() {
+        Intent mainActivityNotificationIntent = new Intent(this, MainMapsActivity.class);
+        return PendingIntent.getActivity(this,0, mainActivityNotificationIntent,0);
     }
 
     private void getLastLocation() {

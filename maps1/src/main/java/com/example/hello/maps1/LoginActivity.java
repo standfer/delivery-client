@@ -41,7 +41,7 @@ public class LoginActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         new UCEHandler.Builder(this).build();
-        LogHelper.createLogFile();
+        LogHelper.createLogFile(true, getClass().getSimpleName());
 
         setContentView(R.layout.activity_login);
 
