@@ -14,7 +14,7 @@ import com.example.hello.maps1.entities.Client;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.entities.ProductInOrder;
-import com.example.hello.maps1.helpers.CollectionsHelper;
+import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
 import com.google.android.gms.maps.GoogleMap;

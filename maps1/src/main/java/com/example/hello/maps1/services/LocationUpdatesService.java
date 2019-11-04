@@ -39,7 +39,7 @@ import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
-import com.example.hello.maps1.helpers.ActivityHelper;
+import com.example.hello.maps1.helpers.activities.ActivityHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -56,11 +56,11 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 /**
  * A bound and started service that is promoted to a foreground service when location updates have
  * been requested and all clients unbind.
- *
+ * <p>
  * For apps running in the background on "O" devices, location is computed only once every 10
  * minutes and delivered batched every 30 minutes. This restriction applies even to apps
  * targeting "N" or lower which are run on "O" devices.
- *
+ * <p>
  * This sample show how to use a long-running service for location updates. When an activity is
  * bound to this service, frequent location updates are permitted. When the activity is removed
  * from the foreground, the service promotes itself to a foreground service, and location updates
@@ -75,9 +75,6 @@ public class LocationUpdatesService extends Service {
     protected static final String TAG = LocationUpdatesService.class.getName();
     public static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
 
-    /**
-     * The name of the channel for notifications.
-     */
     private static final String CHANNEL_ID = "channel_01";
 
     public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
@@ -88,9 +85,6 @@ public class LocationUpdatesService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
 
     /**
@@ -100,9 +94,6 @@ public class LocationUpdatesService extends Service {
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
-    /**
-     * The identifier for the notification displayed for the foreground service.
-     */
     private static final int NOTIFICATION_ID = 12345678;
 
     /**
@@ -163,15 +154,11 @@ public class LocationUpdatesService extends Service {
         mServiceHandler = new Handler(handlerThread.getLooper());
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        // Android O requires a Notification Channel.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.app_name);
-            // Create the channel for the notification
             Log.d(TAG, "Creating NotificationChannel: " + name);
             NotificationChannel mChannel =
                     new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
-
-            // Set the Notification Channel for the Notification Manager.
             mNotificationManager.createNotificationChannel(mChannel);
         }
     }
@@ -264,7 +251,6 @@ public class LocationUpdatesService extends Service {
      * {@link SecurityException}.
      */
     public void requestLocationUpdates(Context context) {
-        //if (ActivityHelper.isMyServiceRunning(context, LocationUpdater.class)) {
         Log.i(TAG, "Requesting location updates");
         ToolsHelper.setRequestingLocationUpdates(this, true);
         startService(new Intent(getApplicationContext(), LocationUpdatesService.class));
@@ -275,7 +261,6 @@ public class LocationUpdatesService extends Service {
             ToolsHelper.setRequestingLocationUpdates(this, false);
             Log.e(TAG, "Lost location permission. Could not request updates. " + unlikely);
         }
-        //}
     }
 
     /**
@@ -324,9 +309,8 @@ public class LocationUpdatesService extends Service {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setWhen(System.currentTimeMillis());
 
-        // Set the Channel ID for Android O.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId(CHANNEL_ID); // Channel ID
+            builder.setChannelId(CHANNEL_ID);
         }
 
         return builder.build();
@@ -334,7 +318,7 @@ public class LocationUpdatesService extends Service {
 
     private PendingIntent getStandardActivityIntent() {
         Intent mainActivityNotificationIntent = new Intent(this, MainMapsActivity.class);
-        return PendingIntent.getActivity(this,0, mainActivityNotificationIntent,0);
+        return PendingIntent.getActivity(this, 0, mainActivityNotificationIntent, 0);
     }
 
     private void getLastLocation() {

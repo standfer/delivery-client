@@ -1,4 +1,4 @@
-package com.example.hello.maps1.helpers;
+package com.example.hello.maps1.helpers.data_types;
 
 import com.example.hello.maps1.entities.BaseEntity;
 

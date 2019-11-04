@@ -1,23 +1,20 @@
 package com.example.hello.maps1;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.hello.maps1.asyncEngines.CredentialsLoader;
 import com.example.hello.maps1.entities.Courier;
-import com.example.hello.maps1.helpers.ActivityHelper;
 import com.example.hello.maps1.helpers.LogHelper;
-import com.example.hello.maps1.services.TrackingService;
+import com.example.hello.maps1.helpers.activities.ActivityHelper;
 import com.rohitss.uceh.UCEHandler;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import androidx.fragment.app.FragmentActivity;
 
 
 /**
@@ -26,15 +23,9 @@ import java.util.TimerTask;
 
 public class LoginActivity extends FragmentActivity {
 
-    Intent trackingIntent;
-    private TrackingService trackingService;
-
-    public int counter=0;
-
     private LoginActivity loginActivity;
     private Button btnLogin;
     private EditText etLogin, etPassword;
-    View.OnClickListener btnLoginOnClickListener;
     private Courier courier;
 
     @Override
@@ -100,17 +91,11 @@ public class LoginActivity extends FragmentActivity {
         initGUIListeners();
     }
 
-    public void openMainActivity(int idCourier) {
-        Intent mainMapsIntent = new Intent(LoginActivity.this, MainMapsActivity.class);
-        mainMapsIntent.putExtra("idCourier", idCourier);
-        startActivity(mainMapsIntent);
-    }
-
     public void logOn(Courier courier) {
         if (courier.getId() != 0) {
             ActivityHelper.changeActivity(getApplicationContext(), this, MainMapsActivity.class, courier.getId());
         } else {
-            //Toast.makeText(getApplicationContext(), "Неверный логин или пароль",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Неверный логин или пароль",Toast.LENGTH_SHORT).show();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -118,38 +103,6 @@ public class LoginActivity extends FragmentActivity {
                     etPassword.setBackgroundColor(Color.RED);
                 }
             });
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (trackingIntent != null) {
-            stopService(trackingIntent);
-        }
-        Log.d(LoginActivity.class.getName(), "onDestroy!");
-        super.onDestroy();
-    }
-
-    private Timer timer;
-    private TimerTask timerTask;
-    public void startTimer() {
-        timer = new Timer();
-        initializeTimerTask();
-        timer.schedule(timerTask, 1000, 1000); //
-    }
-
-    public void initializeTimerTask() {
-        timerTask = new TimerTask() {
-            public void run() {
-                Log.i("in timer", "in LoginActivityTimer ----  "+ (counter++));
-            }
-        };
-    }
-
-    public void stoptimertask() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
         }
     }
 

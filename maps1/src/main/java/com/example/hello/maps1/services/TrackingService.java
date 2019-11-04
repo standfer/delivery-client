@@ -13,8 +13,8 @@ import android.util.Log;
 
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
-import com.example.hello.maps1.helpers.ActivityHelper;
-import com.example.hello.maps1.helpers.NotificationHelper;
+import com.example.hello.maps1.helpers.activities.ActivityHelper;
+import com.example.hello.maps1.helpers.activities.NotificationHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.services.restarters.TrackingRestarterBroadcastReceiver;
 

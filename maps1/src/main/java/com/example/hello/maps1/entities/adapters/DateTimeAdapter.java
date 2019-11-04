@@ -1,6 +1,6 @@
 package com.example.hello.maps1.entities.adapters;
 
-import com.example.hello.maps1.helpers.StringHelper;
+import com.example.hello.maps1.helpers.data_types.StringHelper;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

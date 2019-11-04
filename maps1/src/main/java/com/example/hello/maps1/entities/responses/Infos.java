@@ -1,7 +1,7 @@
 package com.example.hello.maps1.entities.responses;
 
 import com.example.hello.maps1.entities.Order;
-import com.example.hello.maps1.helpers.CollectionsHelper;
+import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

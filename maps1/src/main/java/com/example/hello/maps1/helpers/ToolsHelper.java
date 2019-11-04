@@ -2,15 +2,22 @@ package com.example.hello.maps1.helpers;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
+
+import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.location.Location;
 import android.widget.Toast;
 
+import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
+import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Order;
+import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -30,7 +37,7 @@ public class ToolsHelper {
         toast.show();
     }
 
-    public static void logException(Throwable ex) {
+    public static void logException(Throwable ex) {//todo move to LogHelper
         Log.d(TAG, ex.toString());
         //throw new RuntimeException("Unknown exception", ex);//todo show error to user
     }
@@ -65,6 +72,11 @@ public class ToolsHelper {
                 DateFormat.getDateTimeInstance().format(new Date()));
     }
 
+    public static void initSharedPreferences(Context context) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .registerOnSharedPreferenceChangeListener((SharedPreferences.OnSharedPreferenceChangeListener) context);
+    }
+
     /**
      * Returns true if requesting location updates, otherwise returns false.
      *
@@ -84,6 +96,21 @@ public class ToolsHelper {
                 .edit()
                 .putBoolean(KEY_REQUESTING_LOCATION_UPDATES, requestingLocationUpdates)
                 .apply();
+    }
+
+    public static void showLocation(Location location, Toast toast, MainMapsActivity mainMapsActivity) {
+        if (location == null)
+            return;
+        if (location.getProvider().equals(LocationManager.GPS_PROVIDER)) {
+            toast.setText("GPS provider" + location.toString());
+        } else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)) {
+            toast.setText("Network provider" + location.toString());
+            ;
+        }
+        toast.show();
+        mainMapsActivity.getMrkCurrentPos().setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+        //отправляем объект с текущими координатами на сервер
+        String locationToServer = new Coordinate(location).toJson();
     }
 
     /*protected void enableGps() {

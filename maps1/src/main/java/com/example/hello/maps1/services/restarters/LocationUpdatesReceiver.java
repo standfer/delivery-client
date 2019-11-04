@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.services.LocationUpdatesService;
 
+//todo use this instead of LocationReceiver
 public class LocationUpdatesReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {

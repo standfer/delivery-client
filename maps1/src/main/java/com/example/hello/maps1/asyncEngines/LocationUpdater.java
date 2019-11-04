@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
-import com.example.hello.maps1.helpers.JSONHelper;
+import com.example.hello.maps1.helpers.data_types.JSONHelper;
 import com.example.hello.maps1.requestEngines.RequestHelper;
 
 public class LocationUpdater extends AsyncTask<Courier, Void, Courier> {

@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.hello.maps1.entities.Courier;
-import com.example.hello.maps1.helpers.ActivityHelper;
+import com.example.hello.maps1.helpers.activities.ActivityHelper;
 import com.example.hello.maps1.services.TrackingService;
 
 public class AlarmReceiver extends BroadcastReceiver {

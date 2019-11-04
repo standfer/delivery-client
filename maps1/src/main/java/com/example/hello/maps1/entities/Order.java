@@ -5,7 +5,7 @@ package com.example.hello.maps1.entities;
 import androidx.annotation.NonNull;
 
 import com.example.hello.maps1.entities.adapters.DateTimeAdapter;
-import com.example.hello.maps1.helpers.CollectionsHelper;
+import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

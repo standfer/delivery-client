@@ -1,6 +1,6 @@
 package com.example.hello.maps1;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -10,8 +10,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -31,9 +29,10 @@ import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
-import com.example.hello.maps1.helpers.ActivityHelper;
-import com.example.hello.maps1.helpers.CollectionsHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
+import com.example.hello.maps1.helpers.activities.ActivityHelper;
+import com.example.hello.maps1.helpers.activities.PermissionsHelper;
+import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.listeners.impl.BtnSendLogsListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
@@ -47,39 +46,30 @@ import com.google.android.gms.maps.model.Marker;
 import com.nullwire.trace.ExceptionHandler;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
-    protected static final String TAG = MainMapsActivity.class.getName();
-    protected Intent trackingIntent;
+public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
+    public static final String TAG = MainMapsActivity.class.getName();
 
     private GoogleMap mMap;
     public static Marker mrkCurrentPos;
-    public static String getRequest;
-    private String url;
-    private String urlNewBridge;
-    private String urlOldBridge;
     private Toast toast;
     private MainMapsActivity mainMapsActivity;
-    private boolean isRouteNeed = false;//флаг, нужно ли обращаться к гуглу за маршрутом
     private List<Coordinate> routePoints;
-    double distanceChanged = 0;
+
     private Courier courier;
-    private int idCourier = 10;
     private double coordinateCounter = 0.001;
-    private int orderCounter = 0;
 
     private boolean timerActive;
+    private TimeNotification timeNotification;
 
     private LocationUpdatesService mService = null;
+    private boolean mBound = false;
+    private LocationReceiver locationReceiver; // The BroadcastReceiver used to listen from broadcasts from the service.
 
     //GUI
     private Button btnHelp, btnCall, btnSendLogs, btnManualMove, btnMoveToNextOrder, btnLogout;
@@ -89,16 +79,73 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     private LinearLayout layoutHorizontal;
     private RelativeLayout layoutMap;
 
-    private TimeNotification timeNotification;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        locationReceiver = new LocationReceiver();
+        Log.d(TAG, "MainMapsActivity created");
 
-    private LocationManager locationManager;
-    private boolean mBound = false;
-    // The BroadcastReceiver used to listen from broadcasts from the service.
-    private MyReceiver myReceiver;
+        try {
+            ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
+            ActivityHelper.startWhiteListAddingActivities(this);
+
+            this.mainMapsActivity = this; //todo check if we need just send this instead of mainMapsActivity
+            initGUI();
+
+            courier = new Courier(getIntent());
+        } catch (Throwable ex) {
+            ToolsHelper.logException(ex);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ToolsHelper.initSharedPreferences(this);
+
+        Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
+        ActivityHelper.putToIntent(locationUpdateIntent, courier);
+        bindService(locationUpdateIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+        if (mService != null && !ToolsHelper.isRequestingLocationUpdates(this)) {
+            mService.requestLocationUpdates(this);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(locationReceiver,
+                new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
+
+    }
+
+    /**
+     * Manipulates the map once available. This callback is triggered when the map is ready to be used.
+     */
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        try {
+            setmMap(googleMap);
+            LatLng initPosition = new LatLng(53.123829, 50.0947843);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 10));
+            //setMrkCurrentPos(getmMap().addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Моё Текущее положение").visible(false)));
+            mMap.setPadding(0, Constants.MAP_PADDING_TOP_HALF_SCREEN, 70, 0);
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMapToolbarEnabled(true);
+
+            Coordinate origin = new Coordinate(getMrkCurrentPos().getPosition().latitude, getMrkCurrentPos().getPosition().longitude);//стартовая позиция
+
+            googleMap.setInfoWindowAdapter(new InfoWindowAdapterImpl(getLayoutInflater()));
+        } catch (Throwable ex) {
+            ToolsHelper.logException(ex);
+        }
+    }
 
     // Monitors the state of the connection to the service.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
-
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "Location service connected");
@@ -116,7 +163,26 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
         }
     };
 
+    private class LocationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Receive location by broadcastReceiver");
+            Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
+            if (location != null) {
+                Log.d(TAG, "Received successfully location by broadcastReceiver");
+                Toast.makeText(MainMapsActivity.this, ToolsHelper.getLocationText(location),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void initGUI() {
+        setContentView(R.layout.activity_main_maps);
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.setHasOptionsMenu(true);
+        //mapFragment.getMapAsync(this);
+
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_LONG);
 
         btnCall = (Button) findViewById(R.id.btnCall);
@@ -133,12 +199,10 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
         layoutHorizontal = (LinearLayout) findViewById(R.id.layoutHorizontal);
         layoutHorizontal.setVisibility(View.VISIBLE);
-
         layoutMap = (RelativeLayout) findViewById(R.id.layoutMap);
 
         initGUIListeners();
-        initPermissions();//todo check everywhere onRequestPermissionsResult - in case user change permissions while program works
-        //initTimer();
+        PermissionsHelper.initMainActivityPermissions(this);//todo check everywhere onRequestPermissionsResult - in case user change permissions while program works
     }
 
     private void initGUIListeners() {
@@ -231,46 +295,6 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     }
 
-    private void initPermissions() {
-        int permissionLocationStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        int permissionCoarceLocationStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-        int permissionCallPhoneStatus = ContextCompat.checkSelfPermission(this, Manifest.
-                permission.CALL_PHONE);
-        int permissionInternetStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
-        int permissionWakeLockStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK);
-        int permissionForegroundStatus = ContextCompat.checkSelfPermission(this, "android.permission.FOREGROUND_SERVICE");
-
-        int permissionReadLogsStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_LOGS);
-        int permissionReadExternalStorageStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        int permissionWriteExternalStorageStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permissionLocationStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionCoarceLocationStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionCallPhoneStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionInternetStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionWakeLockStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionReadLogsStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionReadExternalStorageStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionWriteExternalStorageStatus != PackageManager.PERMISSION_GRANTED ||
-                permissionForegroundStatus != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.d(TAG, "Permissions requested");
-            ActivityCompat.requestPermissions(this, new String[]
-                    {
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.CALL_PHONE,
-                            Manifest.permission.INTERNET,
-                            Manifest.permission.WAKE_LOCK,
-                            Manifest.permission.READ_LOGS,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            "android.permission.FOREGROUND_SERVICE"
-
-                    }, Constants.REQUEST_CODE_PERMISSION_ALL);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         try {
@@ -312,102 +336,6 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        myReceiver = new MyReceiver();
-        Log.d(TAG, "MainMapsActivity created");
-
-        try {
-            ExceptionHandler.register(this, Constants.SERVER_LOGS_URL);
-            ActivityHelper.startWhiteListAddingActivities(this);
-
-            this.mainMapsActivity = this; //todo check if we need just send this instead of mainMapsActivity
-            isRouteNeed = true;
-            setContentView(R.layout.activity_main_maps);
-
-            // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-            Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.map);
-            mapFragment.setHasOptionsMenu(true);
-            //mapFragment.getMapAsync(this);
-
-            initGUI();
-
-            idCourier = getIntent().getExtras() != null ? (int) getIntent().getExtras().get("id") : 0;
-            courier = new Courier(idCourier, "Vasya", 1);
-
-            //ActivityHelper.startTrackingService(this, courier);
-            //ActivityHelper.startService(getApplicationContext(), courier, TrackingService.class);
-
-            /*trackingIntent = new Intent(getApplicationContext(), TrackingService.class);
-            ActivityHelper.putToIntent(trackingIntent, (Object) courier);
-
-            if (!isMyServiceRunning(TrackingService.class)) {
-                NotificationHelper.showNotification(this, "Доставка", "Приложение работает", trackingIntent);
-                startService(trackingIntent);
-            }*/
-
-            /*Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        if (courier != null && courier.getCurrentCoordinate() != null) {
-                            courier.requestDataFromServer(mainMapsActivity);
-                            Log.d("Request", String.format("Current coordinate (%s) has sent", courier.getCurrentCoordinate()));
-                        }
-                    } catch(Throwable ex) {
-                        Log.d("Request", ex.getStackTrace().toString());
-                    }
-                }
-            }, 1000, 15000);*/
-        } catch (Throwable ex) {
-            ToolsHelper.logException(ex);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .registerOnSharedPreferenceChangeListener(this);
-
-        Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
-        ActivityHelper.putToIntent(locationUpdateIntent, courier);
-        bindService(locationUpdateIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-
-        if (mService != null && !ToolsHelper.isRequestingLocationUpdates(this)) {
-            mService.requestLocationUpdates(this);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
-                new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
-
-        if (Constants.IS_UI_REFRESH_ENABLED && locationManager != null) {
-            try {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
-
-                //checkEnabled();
-
-            } catch (SecurityException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    protected void onPause() throws SecurityException {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
-        if (locationManager != null) locationManager.removeUpdates(locationListener);
-        super.onPause();
-    }
-
-    @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
     }
 
@@ -418,39 +346,28 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED && mService != null) {
                 mService.requestLocationUpdates(this);
             } else {
-                initPermissions();
-            }
-        }
-    }
-
-    private class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Receive location by broadcastReceiver");
-            Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-            if (location != null) {
-                Log.d(TAG, "Received successfully location by broadcastReceiver");
-                Toast.makeText(MainMapsActivity.this, ToolsHelper.getLocationText(location),
-                        Toast.LENGTH_SHORT).show();
+                PermissionsHelper.initMainActivityPermissions(this);
             }
         }
     }
 
     public synchronized void updateGui(final Courier courier) {
         try {
+            if (courier == null || CollectionsHelper.isEmpty(courier.getOrders())) {
+                Log.e(TAG, "Update GUI failed. Courier is not loaded correctly");
+                return;
+            }
+
             ToolsHelper.logOrders(MainMapsActivity.class, "updateGui", courier.getOrders(), courier.getOrdersAvailable());
-            Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "updateGui"), String.format("courier.orders:%s, courier.ordersAvailable:%s",
+            Log.d(TAG, String.format("courier.orders:%s, courier.ordersAvailable:%s",
                     !CollectionsHelper.isEmpty(courier.getOrders()) ? courier.getOrders().size() : null,
                     !CollectionsHelper.isEmpty(courier.getOrdersAvailable()) ? courier.getOrdersAvailable().size() : null));
 
-            if (courier == null || CollectionsHelper.isEmpty(courier.getOrders())) return;
             List<Order> orders = courier.getOrders();
-
             int countOrders = Math.min(4, orders.size());
 
             for (int i = 0; i < countOrders; i++) {
-                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "updateGui"),
-                        String.format("add orders buttons. Size:%s", !CollectionsHelper.isEmpty(orders) ? orders.size() : null));
+                Log.d(TAG, String.format("add orders buttons. Size:%s", !CollectionsHelper.isEmpty(orders) ? orders.size() : null));
                 final Order order = orders.get(i);
 
                 switch (i) {
@@ -502,137 +419,19 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     }
 
     public void updateFromServer() {
-        //if (courier.getCurrentCoordinate() == null) courier.setCurrentCoordinate(new Coordinate(53.193688, 50.185753));
-
         if (courier.getCurrentCoordinate() != null) {
             courier.requestDataFromServer(mainMapsActivity);
             updateGui(courier);
 
-            Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "updateFromServer"),
-                    String.format("Courier %s coordinates has sent (lat = %s, lng = %s)",
+            Log.d(TAG, String.format("Courier %s coordinates has sent (lat = %s, lng = %s)",
                             courier.getId(), courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()));
         }
     }
 
-    public void initTimer() {
-        Timer timer = new Timer();
-        mainMapsActivity.setTimerActive(true);
-
-        timer.scheduleAtFixedRate(new TimerTask() {
-
-            @Override
-            public void run() {
-                //updateFromServer();
-                try {
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mainMapsActivity.isTimerActive()) {
-                                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "initTimer"), String.format("Courier %s currentCoordinate set", courier));
-                                updateFromServer();
-                            }
-                        }
-                    });
-                } catch (Throwable ex) {
-                    ToolsHelper.logException(ex);
-                }
-            }
-        }, 1000, 5000);
-    }
-
-    private LocationListener locationListener = null; /*new LocationListener() { //TODO NOT FORGOT ABOUT PERMISSIONS FOR MAPS1 IN PHONE/SECURITY
-        @Override
-        public void onLocationChanged(Location location) {
-            try {
-                Coordinate changedLocation = new Coordinate(location);
-
-                courier.setCurrentCoordinate(changedLocation);
-                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "OnLocationChanged"), String.format("Courier %s currentCoordinate set", courier));
-
-                courier.requestDataFromServer(mainMapsActivity);
-                updateGui(courier);
-
-                Log.d(ToolsHelper.getLogTagByClass(MainMapsActivity.class, "OnLocationChanged"),
-                        String.format("Courier %s coordinates has sent (lat = %s, lng = %s)",
-                                courier.getId(), courier.getCurrentCoordinate().getLat(), courier.getCurrentCoordinate().getLng()));
-            } catch (Throwable ex) {
-                ToolsHelper.logException(ex);
-            }
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            if (Constants.IS_SHOW_MSG_PROVIDER_CHANGED) {
-                if (provider.equals(LocationManager.GPS_PROVIDER)) {
-                    toast.setText("Using: " + String.valueOf(LocationManager.GPS_PROVIDER));
-                } else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
-                    toast.setText("Using: " + String.valueOf(LocationManager.NETWORK_PROVIDER));
-                }
-                toast.show();
-            }
-        }
-    };*/
-
-    private boolean isGpsLocation(Location location) {
-        return location != null ? location.getProvider().equals(LocationManager.GPS_PROVIDER) : false;
-    }
-
-    private void showLocation(Location location) {
-        if (location == null)
-            return;
-        if (location.getProvider().equals(LocationManager.GPS_PROVIDER)) {
-            toast.setText("GPS provider" + location.toString());
-        } else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)) {
-            toast.setText("Network provider" + location.toString());
-            ;
-        }
-        toast.show();
-        getMrkCurrentPos().setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
-        //отправляем объект с текущими координатами на сервер
-        String locationToServer = new Coordinate(location).toJson();
-    }
-
-    private void checkEnabled() {
-        try {
-            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                toast.setText("Для работы с программой необходимо включить GPS!");
-                toast.show();
-                //отображаем меню для включения GPS
-                //startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            }
-        } catch (Throwable ex) {
-            ToolsHelper.logException(ex);
-        }
-    }
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        try {
-            setmMap(googleMap);
-            LatLng initPosition = new LatLng(53.123829, 50.0947843);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initPosition, 10));
-            //setMrkCurrentPos(getmMap().addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Моё Текущее положение").visible(false)));
-            mMap.setPadding(0, Constants.MAP_PADDING_TOP_HALF_SCREEN, 70, 0);
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMapToolbarEnabled(true);
-
-            Coordinate origin = new Coordinate(getMrkCurrentPos().getPosition().latitude, getMrkCurrentPos().getPosition().longitude);//стартовая позиция
-
-            googleMap.setInfoWindowAdapter(new InfoWindowAdapterImpl(getLayoutInflater()));
-        } catch (Throwable ex) {
-            ToolsHelper.logException(ex);
-        }
+    protected void onPause() throws SecurityException {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
+        super.onPause();
     }
 
     @Override
@@ -650,8 +449,6 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        if (locationManager != null) locationManager.removeUpdates(locationListener);//todo think mb this is the reason of not sending problems, cause while go to foreground service onDestroy may be called before
     }
 
     public Marker getMrkCurrentPos() {
@@ -664,31 +461,6 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     public void setMrkCurrentPos(String markerTitle) {
         this.mrkCurrentPos.setTitle(markerTitle);
-    }
-
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getUrlNewBridge() {
-        return urlNewBridge;
-    }
-
-    public void setUrlNewBridge(String urlNewBridge) {
-        this.urlNewBridge = urlNewBridge;
-    }
-
-    public String getUrlOldBridge() {
-        return urlOldBridge;
-    }
-
-    public void setUrlOldBridge(String urlOldBridge) {
-        this.urlOldBridge = urlOldBridge;
     }
 
     public TimeNotification getTimeNotification() {
@@ -721,14 +493,6 @@ public class MainMapsActivity extends /*FragmentActivity*/AppCompatActivity impl
 
     public void setCourier(Courier courier) {
         this.courier = courier;
-    }
-
-    public LocationManager getLocationManager() {
-        return locationManager;
-    }
-
-    public void setLocationManager(LocationManager locationManager) {
-        this.locationManager = locationManager;
     }
 
     public boolean isTimerActive() {

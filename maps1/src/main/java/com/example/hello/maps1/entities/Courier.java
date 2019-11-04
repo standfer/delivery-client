@@ -1,6 +1,7 @@
 package com.example.hello.maps1.entities;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
@@ -11,11 +12,11 @@ import com.example.hello.maps1.asyncEngines.LocationUpdater;
 import com.example.hello.maps1.asyncEngines.OrdersAssignment;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.responses.Infos;
-import com.example.hello.maps1.helpers.CollectionsHelper;
-import com.example.hello.maps1.helpers.DateTimeHelper;
-import com.example.hello.maps1.helpers.JSONHelper;
-import com.example.hello.maps1.helpers.NotificationHelper;
-import com.example.hello.maps1.helpers.StringHelper;
+import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
+import com.example.hello.maps1.helpers.data_types.DateTimeHelper;
+import com.example.hello.maps1.helpers.data_types.JSONHelper;
+import com.example.hello.maps1.helpers.activities.NotificationHelper;
+import com.example.hello.maps1.helpers.data_types.StringHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -95,6 +96,12 @@ public class Courier
     public Courier(String login, String password) {
         this.login = login;
         this.password = password;
+    }
+
+    public Courier(Intent intent) {
+        this(intent != null && intent.getExtras() != null ? (int) intent.getExtras().get("id") : 0,
+                "Vasya",
+                1);
     }
 
     public String getName() {

@@ -13,8 +13,8 @@ import com.example.hello.maps1.asyncEngines.DataLoader;
 import com.example.hello.maps1.asyncEngines.DataUpdater;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
-import com.example.hello.maps1.helpers.ActivityHelper;
-import com.example.hello.maps1.helpers.StringHelper;
+import com.example.hello.maps1.helpers.activities.ActivityHelper;
+import com.example.hello.maps1.helpers.data_types.StringHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 

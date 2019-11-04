@@ -1,4 +1,4 @@
-package com.example.hello.maps1.helpers;
+package com.example.hello.maps1.helpers.activities;
 
 import android.app.Activity;
 import android.app.ActivityManager;
