@@ -22,6 +22,7 @@ import com.example.hello.maps1.services.restarters.TrackingRestarterBroadcastRec
  * Created by Ivan on 19.01.2019.
  */
 
+@Deprecated
 public class TrackingService extends Service {
     private LocationManager locationManager;
     private LocationListener locationListener;

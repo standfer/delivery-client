@@ -27,8 +27,11 @@ public class LocationUpdater extends AsyncTask<Courier, Void, Courier> {
 
             responseCourierData = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS,
                     String.format("action=%s&courier=%s", Constants.METHOD_NAME_updateCourierLocation, jsonCourier));
+            responseOrdersUnassignedData = RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS,
+                    String.format("action=%s&courier=%s", Constants.METHOD_NAME_getOrdersUnassigned, jsonCourier));
 
             courier.updateData(responseCourierData, responseOrdersUnassignedData);
+            updateCourier(courier);
 
             /*if (courier.getCurrentCoordinate() != null) {
                 responseRouteData = RequestHelper.requestRouteByCoordinates(courier.getCurrentCoordinate(), courier.getDestinationCoordinate(), courier.getOrders());
@@ -42,5 +45,11 @@ public class LocationUpdater extends AsyncTask<Courier, Void, Courier> {
         }
 
         return null;
+    }
+
+    protected synchronized void updateCourier(Courier srcCourier) {
+        courierMain.setOrders(srcCourier.getOrders());
+        courierMain.setOrdersAvailable(srcCourier.getOrdersAvailable());
+        //courierMain.setOrdersToAssign(srcCourier.getOrdersToAssign());
     }
 }

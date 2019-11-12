@@ -89,7 +89,7 @@ public class AlertDialogFragment {
                             courier.assignOrders(ordersToAssign, mainMapsActivity);
                             courier.updateAssignmentState();
                             //mainMapsActivity.setCourier(courier);
-                            mainMapsActivity.setTimerActive(true);
+                            //mainMapsActivity.setTimerActive(true);
                         }
                     })
                     .setNegativeButton("Отмена",

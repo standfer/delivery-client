@@ -114,7 +114,7 @@ public class ActivityHelper {
         return result;
     }
 
-    public static void putBytesToIntent(Intent intent, Object... parameters) {
+    private static void putBytesToIntent(Intent intent, Object... parameters) {
         try {
             for (Object parameter : parameters) {
                 if (parameter != null) {
@@ -139,6 +139,7 @@ public class ActivityHelper {
         return result;
     }
 
+    @Deprecated
     public static Intent startService(Context context, Courier courier, Class<?> serviceClass) {
         Intent intent = new Intent(context, serviceClass);
         ActivityHelper.putToIntent(intent, (Object) courier);
@@ -151,6 +152,7 @@ public class ActivityHelper {
         return intent;
     }
 
+    @Deprecated
     public static void startAlarmManager(Context context, Courier courier) {
         Intent intent = new Intent(context, AlarmReceiver.class);
         ActivityHelper.putBytesToIntent(intent, courier);

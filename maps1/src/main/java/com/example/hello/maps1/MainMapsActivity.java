@@ -104,12 +104,15 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
         ToolsHelper.initSharedPreferences(this);
 
         Intent locationUpdateIntent = new Intent(this, LocationUpdatesService.class);
-        ActivityHelper.putToIntent(locationUpdateIntent, courier);
+        ActivityHelper.putToIntent(locationUpdateIntent, courier, mainMapsActivity);
         bindService(locationUpdateIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
         if (mService != null && !ToolsHelper.isRequestingLocationUpdates(this)) {
-            mService.requestLocationUpdates(this);
+            mService.requestLocationUpdates(this, mainMapsActivity);
         }
+
+        //todo add update gui, think mb not need
+        updateGui(courier);
     }
 
     @Override
@@ -152,7 +155,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
             LocationUpdatesService.LocalBinder binder = (LocationUpdatesService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
-            mService.requestLocationUpdates(getApplicationContext());
+            mService.requestLocationUpdates(getApplicationContext(), mainMapsActivity);
         }
 
         @Override
@@ -344,7 +347,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
         Log.i(TAG, "Requesting permissions result");
         if (requestCode == Constants.REQUEST_CODE_PERMISSION_ALL && grantResults.length > 0) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED && mService != null) {
-                mService.requestLocationUpdates(this);
+                mService.requestLocationUpdates(this, mainMapsActivity);
             } else {
                 PermissionsHelper.initMainActivityPermissions(this);
             }
@@ -353,7 +356,8 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
     public synchronized void updateGui(final Courier courier) {
         try {
-            if (courier == null || CollectionsHelper.isEmpty(courier.getOrders())) {
+            courier.tryToAssignAvailableOrders(mainMapsActivity);
+            if (!Courier.isReady(courier)) {
                 Log.e(TAG, "Update GUI failed. Courier is not loaded correctly");
                 return;
             }
@@ -372,7 +376,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
                 switch (i) {
                     case 0: {
-                        btnOrder1.setOnClickListener(new View.OnClickListener() {
+                        btnOrder1.setOnClickListener(new View.OnClickListener() {//todo use the only listener
                             @Override
                             public void onClick(View v) {
                                 ActivityHelper.changeActivityWithoutExit(getApplicationContext(), mainMapsActivity, OrderDetailsActivity.class, order, courier);

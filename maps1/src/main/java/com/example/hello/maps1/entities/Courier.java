@@ -276,7 +276,7 @@ public class Courier
 
             if (infosAssigned != null && !infosAssigned.isEmpty()) {
                 this.orders = infosAssigned.getOrders();
-                if (this.orders != null && !this.orders.isEmpty() && this.orders.get(0) != null) {
+                if (!CollectionsHelper.isEmpty(this.orders) && this.orders.get(0) != null) {
                     Collections.sort(this.orders);
                     this.destinationCoordinate = new Coordinate(this.orders.get(this.orders.size() - 1).getLocation().getLat(),
                             this.orders.get(this.orders.size() - 1).getLocation().getLng());
@@ -444,7 +444,12 @@ public class Courier
     }
 
     public boolean isReadyToRequest() {
-        return this != null && this.getId() != 0;
+        return this.getId() != 0;
+    }
+
+    public static boolean isReady(Courier courier) {
+        return courier != null && courier.isReadyToRequest() &&
+                !CollectionsHelper.isEmpty(courier.getOrders());
     }
 
     public void checkOrdersAvailable(List<Order> ordersUnassigned) {

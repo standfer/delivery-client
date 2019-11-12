@@ -128,6 +128,7 @@ public class LocationUpdatesService extends Service {
     private Location mLocation;
 
     private Courier courier;
+    private MainMapsActivity mainMapsActivity;
 
     public LocationUpdatesService() {
     }
@@ -190,6 +191,7 @@ public class LocationUpdatesService extends Service {
         }
 
         Courier courier = (Courier) ActivityHelper.getFromIntent(intent, Courier.class);
+        //MainMapsActivity mainMapsActivity = (MainMapsActivity) ActivityHelper.getFromIntent(intent, MainMapsActivity.class);
         if (courier != null) {
             Log.d(TAG, "Update courier from parameter");
             this.courier = courier;
@@ -250,7 +252,8 @@ public class LocationUpdatesService extends Service {
      * Makes a request for location updates. Note that in this sample we merely log the
      * {@link SecurityException}.
      */
-    public void requestLocationUpdates(Context context) {
+    public void requestLocationUpdates(Context context, MainMapsActivity mainMapsActivity) {
+        this.mainMapsActivity = mainMapsActivity;
         Log.i(TAG, "Requesting location updates");
         ToolsHelper.setRequestingLocationUpdates(this, true);
         startService(new Intent(getApplicationContext(), LocationUpdatesService.class));
@@ -356,6 +359,8 @@ public class LocationUpdatesService extends Service {
         // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground(this)) {
             mNotificationManager.notify(NOTIFICATION_ID, getNotification());
+        } else if (mainMapsActivity != null) {
+            mainMapsActivity.updateGui(courier);
         }
     }
 
