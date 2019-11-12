@@ -5,6 +5,7 @@ import android.util.Pair;
 
 import com.example.hello.maps1.MyIntentService;
 import com.example.hello.maps1.entities.Coordinate;
+import com.example.hello.maps1.helpers.data_types.StringHelper;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -39,6 +40,7 @@ public class RouteHelper {
         PolylineOptions routeLine = null;
         if (origin != null) {
             String routeToDestination = RequestHelper.requestRouteByCoordinates(origin, destination);
+            if (!StringHelper.isEmpty(routeToDestination) && routeToDestination.contains("ZERO_RESULTS")) return null;
             List<Coordinate> routePoints = MyIntentService.pointsCoordinates(routeToDestination);
 
             routeLine = RouteHelper.getRoutePolyline(routePoints);

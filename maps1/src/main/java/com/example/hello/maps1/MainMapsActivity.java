@@ -356,7 +356,14 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
     public synchronized void updateGui(final Courier courier) {
         try {
+            mainMapsActivity.setCourier(courier);
             courier.tryToAssignAvailableOrders(mainMapsActivity);
+
+            /*btnOrder1.setVisibility(View.INVISIBLE);
+            btnOrder2.setVisibility(View.INVISIBLE);
+            btnOrder3.setVisibility(View.INVISIBLE);
+            btnOrder4.setVisibility(View.INVISIBLE);*/
+
             if (!Courier.isReady(courier)) {
                 Log.e(TAG, "Update GUI failed. Courier is not loaded correctly");
                 return;
