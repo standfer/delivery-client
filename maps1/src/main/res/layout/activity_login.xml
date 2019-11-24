@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Ivan" />
+            android:text="@string/activity_defaultLogin" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:inputType="textPassword"
-            android:text="pass" />
+            android:text="@string/activity_defaultPassword" />
     </RelativeLayout>
 
 

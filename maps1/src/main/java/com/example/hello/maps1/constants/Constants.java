@@ -7,7 +7,7 @@ import com.example.hello.maps1.R;
  */
 
 public interface Constants {
-    //String SERVER_ADDRESS = "http://192.168.1.37/delivery/helpers/helper.php"; //"http://192.168.0.102/delivery/helpers/helper.php";// "http://192.168.43.4/delivery/helpers/helper.php";//"http://192.168.1.34/delivery/helpers/helper.php";
+    //String SERVER_ADDRESS = "http://192.168.0.9/delivery/helpers/helper.php"; //"http://192.168.0.102/delivery/helpers/helper.php";// "http://192.168.43.4/delivery/helpers/helper.php";//"http://192.168.1.34/delivery/helpers/helper.php";
     //String SERVER_ADDRESS = "http://192.168.43.185/delivery/helpers/helper.php";
 
     String SERVER_ADDRESS = "http://standfer231.myjino.ru/delivery/helpers/helper.php";

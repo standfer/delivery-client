@@ -358,11 +358,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
         try {
             mainMapsActivity.setCourier(courier);
             courier.tryToAssignAvailableOrders(mainMapsActivity);
-
-            /*btnOrder1.setVisibility(View.INVISIBLE);
-            btnOrder2.setVisibility(View.INVISIBLE);
-            btnOrder3.setVisibility(View.INVISIBLE);
-            btnOrder4.setVisibility(View.INVISIBLE);*/
+            setBtnOrdersVisible(false);
 
             if (!Courier.isReady(courier)) {
                 Log.e(TAG, "Update GUI failed. Courier is not loaded correctly");
@@ -427,6 +423,14 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
         } catch (Throwable ex) {
             ToolsHelper.logException(ex);
         }
+    }
+
+    protected void setBtnOrdersVisible(boolean isVisible) {
+        int visibility = isVisible ? View.VISIBLE : View.INVISIBLE;
+        btnOrder1.setVisibility(visibility);
+        btnOrder2.setVisibility(visibility);
+        btnOrder3.setVisibility(visibility);
+        btnOrder4.setVisibility(visibility);
     }
 
     public void updateFromServer() {

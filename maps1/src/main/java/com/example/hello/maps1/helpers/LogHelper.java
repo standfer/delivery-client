@@ -21,6 +21,7 @@ import androidx.core.content.FileProvider;
 
 public class LogHelper {
     public static final String TAG = LogHelper.class.getName();
+    protected static Integer MAX_PART_LOG_LENGTH = 2000;
 
     public static void createLogFile(boolean isNeedClearLogs) {
         createLogFile(isNeedClearLogs, null);
@@ -153,5 +154,25 @@ public class LogHelper {
     public static void enableStrictMode() { //for not creating signature and uri.fileProvider (https://stackoverflow.com/questions/48117511/exposed-beyond-app-through-clipdata-item-geturi?rq=1)
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
+    }
+
+    public static void printLargeLog(String TAG, String log) {
+        try {
+            if (StringHelper.isEmpty(log))
+                return;
+
+            int partNum = 1;
+            int beginIndex = 0;
+            int endIndex = MAX_PART_LOG_LENGTH < log.length() ? MAX_PART_LOG_LENGTH : log.length();
+
+            while (endIndex <= log.length() && beginIndex < endIndex) {
+                Log.d(TAG + "_part_" + partNum++, log.substring(beginIndex, endIndex));
+                beginIndex = endIndex;
+                endIndex += MAX_PART_LOG_LENGTH;
+                if (endIndex > log.length()) endIndex = log.length();
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Unable to print large log: " + log);
+        }
     }
 }

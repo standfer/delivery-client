@@ -15,6 +15,7 @@ import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.entities.ProductInOrder;
 import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
+import com.example.hello.maps1.helpers.data_types.StringHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
 import com.google.android.gms.maps.GoogleMap;
@@ -82,11 +83,9 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
         tvOrderCost.setText(order.getCost() + "");
         tvNotes.setText(order.getNotes());
 
-
-        if (client != null) {
+        btnCallClient.setText(String.format("%s тел. %s", btnCallClient.getText(), getPhone(client, order)));
+        if (client != null)
             tvClientName.setText(client.getName());
-            btnCallClient.setText(String.format("%s тел. %s", btnCallClient.getText(), client.getPhone()));
-        }
     }
 
     private void initGui() {
@@ -123,33 +122,30 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
                 finish();
             }
         });
+        btnCallClient.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), getPhone(client, order)));
 
-        if (client != null) {
-            btnCallClient.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), client.getPhone()));
+        btnOrderDetails.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeOrderDetailsVisibility();
+                if (order == null || CollectionsHelper.isEmpty(order.getProductsInOrder())) return;
 
-            btnOrderDetails.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    changeOrderDetailsVisibility();
-                    if (order == null || CollectionsHelper.isEmpty(order.getProductsInOrder())) return;
+                tvOrderOdd.setText(order.getOdd() + "");
+                for (ProductInOrder productInOrder : order.getProductsInOrder()) {
+                    TextView productName = new TextView(getApplicationContext());
+                    TextView productQuantity = new TextView(getApplicationContext());
+                    TextView productPrice = new TextView(getApplicationContext());
 
-                    tvOrderOdd.setText(order.getOdd() + "");
-                    for (ProductInOrder productInOrder : order.getProductsInOrder()) {
-                        TextView productName = new TextView(getApplicationContext());
-                        TextView productQuantity = new TextView(getApplicationContext());
-                        TextView productPrice = new TextView(getApplicationContext());
+                    productName.setText(productInOrder.getProduct().getName());
+                    productQuantity.setText(productInOrder.getQuantity() + "");
+                    productPrice.setText(productInOrder.getProduct().getPrice() + "");
 
-                        productName.setText(productInOrder.getProduct().getName());
-                        productQuantity.setText(productInOrder.getQuantity() + "");
-                        productPrice.setText(productInOrder.getProduct().getPrice() + "");
-
-                        trProductTitle.addView(productName);
-                        trProductTitle.addView(productQuantity);
-                        trProductTitle.addView(productPrice);
-                    }
+                    trProductTitle.addView(productName);
+                    trProductTitle.addView(productQuantity);
+                    trProductTitle.addView(productPrice);
                 }
-            });
-        }
+            }
+        });
 
         btnCallOperator.setOnClickListener(new BtnCallListenerImpl(this, getApplicationContext(), Constants.PHONE_NUMBER_OPERATOR));
     }
@@ -175,6 +171,12 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
 
         OrderDetailsRouteBuilder orderDetailsRouteBuilder = new OrderDetailsRouteBuilder();
         orderDetailsRouteBuilder.execute(this);
+    }
+
+    private String getPhone(Client client, Order order) {
+        if (client != null && StringHelper.isEmpty(client.getPhone())) {
+            return client.getPhone();
+        } else return order.getPhoneNumber();
     }
 
     public GoogleMap getMap() {

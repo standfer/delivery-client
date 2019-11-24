@@ -33,7 +33,7 @@
             android:layout_height="match_parent"
             android:layout_weight="7"
             android:ems="10"
-            android:text="--"
+            android:text="@string/btnBack_caption"
             android:textSize="18sp" />
 
         <TextView

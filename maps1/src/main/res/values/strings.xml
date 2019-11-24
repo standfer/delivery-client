@@ -30,4 +30,8 @@
     <!--UI todo move here all ui captions-->
     <string name="btnCall_caption">Позвонить оператору</string>
     <string name="btnSendLogs_caption">Отправить логи</string>
+    <string name="btnBack_caption">--</string>
+
+    <string name="activity_defaultLogin">Yuri</string>
+    <string name="activity_defaultPassword">pass</string>
 </resources>

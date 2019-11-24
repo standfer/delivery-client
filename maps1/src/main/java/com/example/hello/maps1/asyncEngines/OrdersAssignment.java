@@ -6,7 +6,7 @@ import android.util.Log;
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
-import com.example.hello.maps1.entities.responses.CourierInfo;
+import com.example.hello.maps1.helpers.data_types.JSONHelper;
 import com.example.hello.maps1.requestEngines.RequestHelper;
 
 /**
@@ -16,24 +16,31 @@ import com.example.hello.maps1.requestEngines.RequestHelper;
 public class OrdersAssignment extends AsyncTask<MainMapsActivity, Void, Void> {
     protected static final String TAG = OrdersAssignment.class.getName();
 
+    private Courier courierMain;
+
     @Override
     protected Void doInBackground(MainMapsActivity... mainMapsActivities) {
         try {
             MainMapsActivity mainMapsActivity = mainMapsActivities[0];
-            Courier courier = mainMapsActivity.getCourier();
-            CourierInfo courierInfo = new CourierInfo(courier.getId(), courier.getOrdersToAssign());
+            this.courierMain = mainMapsActivity.getCourier();
+            Courier courier = (Courier) courierMain.clone();//mb not need
+            courier.getOrdersAvailable().clear();
 
-            String courierInJson = RequestHelper.convertObjectToJson(courier); //JSONHelper.getJsonFromObject(courier);
+            String courierInJson = JSONHelper.getJsonFromObject(courier);
 
             String ordersAssignRequest =
                     RequestHelper.resultPostRequest(Constants.SERVER_ADDRESS,
                             String.format("action=%s&courier=%s", Constants.METHOD_NAME_assignOrdersToCourier, courierInJson));
 
-            courier.clearAssignment(); //todo check if response successful and clear
-
+            updateCourier(courierMain);
         } catch (Throwable e) {
             Log.d(TAG, "Order assign error\n" + e.getStackTrace().toString());
         }
         return null;
+    }
+
+    protected synchronized void updateCourier(Courier srcCourier) {
+        courierMain.clearAssignment(); //todo check if response successful and clear, check timeout passed for ordersAvailable
+        //courierMain.setOrders(srcCourier.getOrders());
     }
 }

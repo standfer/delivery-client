@@ -4,6 +4,7 @@ import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
+import com.example.hello.maps1.helpers.LogHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -24,15 +25,18 @@ import java.util.List;
  */
 
 public class RequestHelper {
+    protected static final String TAG = RequestHelper.class.getName();
 
-    public static String resultPostRequest(String urlPath, String urlParameters) {
+    public static synchronized String resultPostRequest(String urlPath, String urlParameters) {
         try {
             URL url = new URL(urlPath);
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("USER-AGENT", "Mozilla/5.0");
-            connection.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
+            connection.setRequestProperty("ACCEPT-LANGUAGE", "*");
+//            if (!urlParameters.contains("getCourierIdByCredentials"))
+//                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");//todo check which encoding need for russian in subclasses
             connection.setDoOutput(true);
             DataOutputStream dStream = new DataOutputStream(connection.getOutputStream());
             dStream.writeBytes(urlParameters);
@@ -47,7 +51,10 @@ public class RequestHelper {
             }
             br.close();
 
-            return responseOutput != null ? responseOutput.toString() : "";
+            LogHelper.printLargeLog(TAG, String.format("Executed request: %s\n\t" +
+                            "parameters: %s\n" +
+                            "Response: %s", urlPath, urlParameters, responseOutput.toString()));
+            return responseOutput.toString();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (ProtocolException e) {
@@ -84,14 +91,14 @@ public class RequestHelper {
         try {
             URL url = new URL(String.format(
                     "https://maps.googleapis.com/maps/api/directions/json?origin=%s,%s" +
-                    "&destination=%s,%s" +
-                    "&departure_time=now&traffic_model=best_guess&key=%s",
+                            "&destination=%s,%s" +
+                            "&departure_time=now&traffic_model=best_guess&key=%s",
                     origin.getLat(),
                     origin.getLng(),
                     destination.getLat(),
                     destination.getLng(),
                     Constants.google_api_key
-                    ));
+            ));
             connection = (HttpURLConnection) url.openConnection();
             //if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
             InputStream in = new BufferedInputStream(connection.getInputStream());//);url.openStream()
@@ -125,7 +132,7 @@ public class RequestHelper {
                 destination = new Coordinate(origin.getLat(), origin.getLng());
             }
             urlBuilder += String.format("&destination=%s,%s" +
-                    "&departure_time=now&traffic_model=best_guess&key=%s",
+                            "&departure_time=now&traffic_model=best_guess&key=%s",
                     destination.getLat(),
                     destination.getLng(),
                     Constants.google_api_key
@@ -235,7 +242,7 @@ public class RequestHelper {
     public static String convertObjectToJson(Object object) {//сериализация объекта в json
         try {
             if (object instanceof Courier) {
-                ((Courier)object).clear();
+                ((Courier) object).clear();
             }
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             return gson.toJson(object);

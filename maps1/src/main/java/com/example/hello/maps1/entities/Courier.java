@@ -236,14 +236,14 @@ public class Courier
     }
 
     public void clearAssignment() {
-        /*if (!CollectionsHelper.isEmpty(this.ordersToAssign)) {
+        if (!CollectionsHelper.isEmpty(this.ordersToAssign)) {
             this.ordersToAssign.clear();
         }
         if (!CollectionsHelper.isEmpty(this.ordersAvailable)) {
             this.ordersAvailable.clear();
         }
 
-        Log.d(String.valueOf(Courier.class), String.format("Courier %s assignment cleared", this));*/
+        Log.d(String.valueOf(Courier.class), String.format("Courier %s assignment cleared", this));
     }
 
     public String getLogin() {
@@ -282,8 +282,7 @@ public class Courier
                             this.orders.get(this.orders.size() - 1).getLocation().getLng());
                 }
             }
-
-            Log.d(TAG, String.format("Update courier.orders (%s)", !CollectionsHelper.isEmpty(orders) ? orders.toString() + ":" + orders.size() : null));
+            //Log.d(TAG, String.format("Update courier.orders (%s)", !CollectionsHelper.isEmpty(orders) ? orders.toString() + ":" + orders.size() : null));
 
             if (!StringHelper.isEmpty(responseOrdersUnassigned)) {
                 Infos infosUnassigned = (Infos) JSONHelper.getObjectFromJson(responseOrdersUnassigned, Infos.class);
@@ -297,8 +296,7 @@ public class Courier
 
                     checkOrdersAvailable(this.ordersAvailable);
                 }
-
-                Log.d(TAG, String.format("Update courier.ordersAvailable (%s)", !CollectionsHelper.isEmpty(ordersAvailable) ? ordersAvailable.toString() + ":" + ordersAvailable.size() : null));
+                //Log.d(TAG, String.format("Update courier.ordersAvailable (%s)", !CollectionsHelper.isEmpty(ordersAvailable) ? ordersAvailable.toString() + ":" + ordersAvailable.size() : null));
             }
         } catch (Throwable ex) {
             ToolsHelper.logException(ex);
