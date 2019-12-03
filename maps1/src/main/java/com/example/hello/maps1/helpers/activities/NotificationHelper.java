@@ -86,6 +86,11 @@ public class NotificationHelper {
         }
     }
 
+    public static PendingIntent getStandardActivityIntent(FragmentActivity activity) {
+        Intent mainActivityNotificationIntent = new Intent(activity, MainMapsActivity.class);
+        return PendingIntent.getActivity(activity, 0, mainActivityNotificationIntent, 0);
+    }
+
     public static void showNotification(FragmentActivity activity, String title, String messageRoute) {
         Context context = activity.getApplicationContext();
 
@@ -102,6 +107,7 @@ public class NotificationHelper {
         builder.setTicker(messageRoute);
         builder.setContentTitle(title);
         builder.setContentText(messageRoute);
+        builder.setContentIntent(getStandardActivityIntent(activity));
         builder.setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal);
         builder.setContentIntent(pendingIntent);
         builder.setNumber(100);

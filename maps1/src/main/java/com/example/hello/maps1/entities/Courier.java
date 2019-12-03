@@ -473,11 +473,11 @@ public class Courier
 
             AlertDialog ordersToAssignDialog = AlertDialogFragment.showOrdersToAssign(mainMapsActivity);
 
+            NotificationHelper.showNotification(mainMapsActivity, Constants.MSG_ORDERS_AVAILABLE_TITLE, Constants.MSG_ORDERS_AVAILABLE);
             if (ordersToAssignDialog != null) {
-                NotificationHelper.showNotification(mainMapsActivity, Constants.MSG_ORDERS_AVAILABLE_TITLE, Constants.MSG_ORDERS_AVAILABLE);
                 ordersToAssignDialog.show();
-                mainMapsActivity.setTimerActive(false);
             }
+            mainMapsActivity.setTimerActive(false);
         }
     }
 

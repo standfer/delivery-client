@@ -359,7 +359,8 @@ public class LocationUpdatesService extends Service {
         // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground(this)) {
             mNotificationManager.notify(NOTIFICATION_ID, getNotification());
-        } else if (mainMapsActivity != null) {
+        }
+        if (mainMapsActivity != null) {
             mainMapsActivity.updateGui(courier);
         }
     }
