@@ -173,8 +173,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
             Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
             if (location != null) {
                 Log.d(TAG, "Received successfully location by broadcastReceiver");
-                Toast.makeText(MainMapsActivity.this, ToolsHelper.getLocationText(location),
-                        Toast.LENGTH_SHORT).show();
+                ToolsHelper.showMsgToUser(MainMapsActivity.this, ToolsHelper.getLocationText(location));
             }
         }
     }
@@ -358,7 +357,6 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
         try {
             mainMapsActivity.setCourier(courier);
             courier.tryToAssignAvailableOrders(mainMapsActivity);
-            setBtnOrdersVisible(false);
 
             if (!Courier.isReady(courier)) {
                 Log.e(TAG, "Update GUI failed. Courier is not loaded correctly");
@@ -372,6 +370,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
             List<Order> orders = courier.getOrders();
             int countOrders = Math.min(4, orders.size());
+            refreshBtnOrdersVisibility(countOrders);
 
             for (int i = 0; i < countOrders; i++) {
                 Log.d(TAG, String.format("add orders buttons. Size:%s", !CollectionsHelper.isEmpty(orders) ? orders.size() : null));
@@ -425,12 +424,31 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
-    protected void setBtnOrdersVisible(boolean isVisible) {
-        int visibility = isVisible ? View.VISIBLE : View.INVISIBLE;
-        btnOrder1.setVisibility(visibility);
-        btnOrder2.setVisibility(visibility);
-        btnOrder3.setVisibility(visibility);
-        btnOrder4.setVisibility(visibility);
+    protected void refreshBtnOrdersVisibility(int countOrders) {
+        switch (countOrders) {
+            case 1: {
+                ToolsHelper.setButtonsVisible(true, btnOrder1);
+                ToolsHelper.setButtonsVisible(false, btnOrder2, btnOrder3, btnOrder4);
+                break;
+            }
+            case 2: {
+                ToolsHelper.setButtonsVisible(true, btnOrder1, btnOrder2);
+                ToolsHelper.setButtonsVisible(false, btnOrder3, btnOrder4);
+                break;
+            }
+            case 3: {
+                ToolsHelper.setButtonsVisible(true, btnOrder1, btnOrder2, btnOrder3);
+                ToolsHelper.setButtonsVisible(false, btnOrder4);
+                break;
+            }
+            case 4: {
+                ToolsHelper.setButtonsVisible(true, btnOrder1, btnOrder2, btnOrder3, btnOrder4);
+                break;
+            }
+            default:{
+                ToolsHelper.setButtonsVisible(false, btnOrder1, btnOrder2, btnOrder3, btnOrder4);
+            }
+        }
     }
 
     public void updateFromServer() {

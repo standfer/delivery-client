@@ -10,10 +10,13 @@ import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.location.Location;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
+import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
@@ -35,6 +38,12 @@ public class ToolsHelper {
     public static void showMsgToUser(String msg, Toast toast) {
         toast.setText(msg);
         toast.show();
+    }
+
+    public static void showMsgToUser(Context context, String msg) {
+        if (Constants.IS_SHOW_DEBUG_MSG_ENABLED) {
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static void logException(Throwable ex) {//todo move to LogHelper
@@ -127,4 +136,11 @@ public class ToolsHelper {
             sendBroadcast(poke);
         }
     }*/
+
+    public static void setButtonsVisible(boolean isVisible, Button... buttons) {
+        int visibility = isVisible ? View.VISIBLE : View.INVISIBLE;
+        for (Button button : buttons) {
+            button.setVisibility(visibility);
+        }
+    }
 }

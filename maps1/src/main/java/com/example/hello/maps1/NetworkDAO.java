@@ -32,6 +32,7 @@ import java.util.List;
 /**
  * Created by Lyubov_Kutergina on 31.01.2016. // not used now, instead of - MyIntentService
  */
+@Deprecated
 public class NetworkDAO extends AsyncTask<MainMapsActivity, Void, Courier> {//<String, Void, String> {
     protected static final String TAG = NetworkDAO.class.getName();
 

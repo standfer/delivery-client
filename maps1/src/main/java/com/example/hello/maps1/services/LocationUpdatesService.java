@@ -41,6 +41,7 @@ import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.helpers.activities.ActivityHelper;
 import com.example.hello.maps1.helpers.ToolsHelper;
+import com.example.hello.maps1.helpers.activities.NotificationHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -75,7 +76,7 @@ public class LocationUpdatesService extends Service {
     protected static final String TAG = LocationUpdatesService.class.getName();
     public static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
 
-    private static final String CHANNEL_ID = "channel_01";
+    private static final String CHANNEL_ID =Constants.HIDE_CHANNEL;
 
     public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
 
@@ -159,7 +160,7 @@ public class LocationUpdatesService extends Service {
             CharSequence name = getString(R.string.app_name);
             Log.d(TAG, "Creating NotificationChannel: " + name);
             NotificationChannel mChannel =
-                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_LOW);
             mNotificationManager.createNotificationChannel(mChannel);
         }
     }
@@ -305,7 +306,7 @@ public class LocationUpdatesService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(Constants.SERVICE_NOTIFICATION_TITLE)
                 .setContentText(notificationText)
-                .setContentIntent(getStandardActivityIntent())
+                .setContentIntent(NotificationHelper.getStandardActivityIntent(this))
                 .setTicker(notificationText)
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_HIGH)
@@ -317,11 +318,6 @@ public class LocationUpdatesService extends Service {
         }
 
         return builder.build();
-    }
-
-    private PendingIntent getStandardActivityIntent() {
-        Intent mainActivityNotificationIntent = new Intent(this, MainMapsActivity.class);
-        return PendingIntent.getActivity(this, 0, mainActivityNotificationIntent, 0);
     }
 
     private void getLastLocation() {

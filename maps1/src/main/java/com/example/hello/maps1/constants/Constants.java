@@ -49,6 +49,8 @@ public interface Constants {
     int SERVICE_NOTIFICATION_ICON = R.drawable.common_google_signin_btn_icon_dark_normal;
     String SERVICE_NOTIFICATION_TITLE = "Доставка";
     String SERVICE_NOTIFICATION_TEXT = "Приложение запущено";
+    String HIDE_CHANNEL = "hide";
+    String DEFAULT_CHANNEL = "default";
 
     int ALARM_RECEIVER_ID = 321456;
     long ALARM_INTERVAL_FIVE_SECONDS = 5000L; //300000L;
@@ -56,6 +58,7 @@ public interface Constants {
 
     boolean IS_UI_REFRESH_ENABLED = false;
     boolean IS_SHOW_MSG_PROVIDER_CHANGED = false;
+    boolean IS_SHOW_DEBUG_MSG_ENABLED = false;
 
     String google_api_key = "todo input google_api_key here";
 }
