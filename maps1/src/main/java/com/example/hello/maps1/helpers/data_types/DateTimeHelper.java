@@ -18,4 +18,9 @@ public class DateTimeHelper {
     public static String getCurrentDateTimeFormatted() {
         return DateTimeFormat.forPattern("YYYY-MM-dd_HH_mm").print(new DateTime());
     }
+
+    public static String getDateTimeTodayFormatted(DateTime dateTime) {
+        if (dateTime == null) return "";
+        return DateTimeFormat.forPattern("HH:mm").print(dateTime);
+    }
 }

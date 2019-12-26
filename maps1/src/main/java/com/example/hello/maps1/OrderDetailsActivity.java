@@ -15,6 +15,7 @@ import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.entities.ProductInOrder;
 import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
+import com.example.hello.maps1.helpers.data_types.DateTimeHelper;
 import com.example.hello.maps1.helpers.data_types.StringHelper;
 import com.example.hello.maps1.listeners.impl.BtnCallListenerImpl;
 import com.example.hello.maps1.requestEngines.InfoWindowAdapterImpl;
@@ -77,8 +78,8 @@ public class OrderDetailsActivity extends FragmentActivity implements OnMapReady
         tvOddMoneyFrom.append(" " + order.getOdd());
         tvOrderAddress.setText(order.getAddress());
 
-        tvOrderApproveTime.setText(order.getCreateTs() != null ? order.getCreateTs().toString() : "22:30");
-        tvOrderDeliveryTime.setText(order.getDeliverTs() != null ? order.getDeliverTs().toString() : "23:30");
+        tvOrderApproveTime.setText(DateTimeHelper.getDateTimeTodayFormatted(order.getCreateTs()));
+        tvOrderDeliveryTime.setText(DateTimeHelper.getDateTimeTodayFormatted(order.getDeliverTs()));
 
         tvOrderCost.setText(order.getCost() + "");
         tvNotes.setText(order.getNotes());

@@ -8,16 +8,15 @@ import android.util.Log;
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.NetworkDAO;
 import com.example.hello.maps1.activities.alerts.AlertDialogFragment;
-import com.example.hello.maps1.asyncEngines.LocationUpdater;
 import com.example.hello.maps1.asyncEngines.OrdersAssignment;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.responses.Infos;
+import com.example.hello.maps1.helpers.ToolsHelper;
+import com.example.hello.maps1.helpers.activities.NotificationHelper;
 import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
 import com.example.hello.maps1.helpers.data_types.DateTimeHelper;
 import com.example.hello.maps1.helpers.data_types.JSONHelper;
-import com.example.hello.maps1.helpers.activities.NotificationHelper;
 import com.example.hello.maps1.helpers.data_types.StringHelper;
-import com.example.hello.maps1.helpers.ToolsHelper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -246,6 +245,20 @@ public class Courier
         Log.d(String.valueOf(Courier.class), String.format("Courier %s assignment cleared", this));
     }
 
+    public void clearList(List<Order> orders) {
+        if (!CollectionsHelper.isEmpty(orders)) {
+            orders.clear();
+        }
+    }
+
+    public void clearRussianInfo() {
+        if (CollectionsHelper.isEmpty(ordersToAssign)) return;
+
+        for (Order orderToAssign : ordersToAssign) {
+            orderToAssign.setAddress(null);
+        }
+    }
+
     public String getLogin() {
         return login;
     }
@@ -401,15 +414,16 @@ public class Courier
         }
     }
 
+    @Deprecated
     public void requestDataFromServer() {
-        if (isReadyToRequest()) {
+        /*if (isReadyToRequest()) {
             LocationUpdater locationUpdater = new LocationUpdater();
             try {
                 locationUpdater.execute(this);
             } catch (Exception e) {
                 ToolsHelper.logException(e);
             }
-        }
+        }*/
     }
 
     public boolean isDestinationReached() {
@@ -468,13 +482,17 @@ public class Courier
         //currentCoordinate.distanceTo(order.getWorkPlace().getLocation()) <= Constants.DISTANCE_DRIVER_NEAR_WORKPLACE;
     }
 
-    public void tryToAssignAvailableOrders(MainMapsActivity mainMapsActivity) throws CloneNotSupportedException {
-        if (!CollectionsHelper.isEmpty(this.ordersAvailable)) {
+    public synchronized void tryToAssignAvailableOrders(MainMapsActivity mainMapsActivity) throws CloneNotSupportedException {
+        if (!CollectionsHelper.isEmpty(this.ordersAvailable) && CollectionsHelper.isEmpty(mainMapsActivity.getCourier().getOrdersToAssign())) {
+
+            if (mainMapsActivity.getAssignedOrdersAlertDialog() != null) {
+                AlertDialog oldAlertDialog = mainMapsActivity.getAssignedOrdersAlertDialog();
+                oldAlertDialog.cancel();
+            }
 
             AlertDialog ordersToAssignDialog = AlertDialogFragment.showOrdersToAssign(mainMapsActivity);
-
-            NotificationHelper.showNotification(mainMapsActivity, Constants.MSG_ORDERS_AVAILABLE_TITLE, Constants.MSG_ORDERS_AVAILABLE);
             if (ordersToAssignDialog != null) {
+                NotificationHelper.showNotification(mainMapsActivity, Constants.MSG_ORDERS_AVAILABLE_TITLE, Constants.MSG_ORDERS_AVAILABLE);
                 ordersToAssignDialog.show();
             }
             mainMapsActivity.setTimerActive(false);
@@ -492,9 +510,9 @@ public class Courier
 
     public synchronized void assignOrders(List<Order> ordersToAssign, MainMapsActivity mainMapsActivity) {
         this.ordersToAssign = ordersToAssign;
-        updateOrdersAssignedInDb(mainMapsActivity);
     }
 
+    @Deprecated
     private void updateOrdersAssignedInDb(MainMapsActivity mainMapsActivity) {
         if (!CollectionsHelper.isEmpty(ordersToAssign)) {
             OrdersAssignment ordersAssignment = new OrdersAssignment();

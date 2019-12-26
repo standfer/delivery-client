@@ -9,6 +9,7 @@ import com.example.hello.maps1.entities.Coordinate;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.helpers.ToolsHelper;
 
+@Deprecated
 public class DeliveryLocationListener implements LocationListener {
     private Courier courier;
 

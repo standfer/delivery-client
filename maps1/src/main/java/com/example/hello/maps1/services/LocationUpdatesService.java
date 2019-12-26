@@ -76,7 +76,7 @@ public class LocationUpdatesService extends Service {
     protected static final String TAG = LocationUpdatesService.class.getName();
     public static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
 
-    private static final String CHANNEL_ID =Constants.HIDE_CHANNEL;
+    public static final String CHANNEL_ID =Constants.HIDE_CHANNEL;
 
     public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
 
@@ -345,7 +345,8 @@ public class LocationUpdatesService extends Service {
         mLocation = location;
         updateCourierIfNeed(null);
         courier.setCurrentCoordinate(location);
-        courier.requestDataFromServer();//todo check npe
+        mainMapsActivity.setCourier(courier);
+        ToolsHelper.requestDataFromServerByHandler(mainMapsActivity);
 
         // Notify anyone listening for broadcasts about the new location.
         Intent intent = new Intent(ACTION_BROADCAST);
@@ -356,9 +357,9 @@ public class LocationUpdatesService extends Service {
         if (serviceIsRunningInForeground(this)) {
             mNotificationManager.notify(NOTIFICATION_ID, getNotification());
         }
-        if (mainMapsActivity != null) {
+        /*if (mainMapsActivity != null) {
             mainMapsActivity.updateGui(courier);
-        }
+        }*/
     }
 
     /**

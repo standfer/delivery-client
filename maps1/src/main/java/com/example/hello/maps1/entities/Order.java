@@ -35,12 +35,12 @@ public class Order extends BaseEntity
     @JsonIgnore
     private boolean isDelivered;
 
-    @JsonProperty("create_ts")
+    @JsonProperty("createTs")
     @JsonDeserialize(using = DateTimeAdapter.Deserializer.class)
     @JsonSerialize(using = DateTimeAdapter.Serializer.class)
     private DateTime createTs;
 
-    @JsonProperty("deliver_ts")
+    @JsonProperty("deliverTs")
     @JsonDeserialize(using = DateTimeAdapter.Deserializer.class)
     @JsonSerialize(using = DateTimeAdapter.Serializer.class)
     private DateTime deliverTs;

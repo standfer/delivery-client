@@ -13,6 +13,7 @@ import com.example.hello.maps1.requestEngines.RequestHelper;
  * Created by Ivan on 10.12.2017.
  */
 
+@Deprecated
 public class OrdersAssignment extends AsyncTask<MainMapsActivity, Void, Void> {
     protected static final String TAG = OrdersAssignment.class.getName();
 
@@ -24,7 +25,9 @@ public class OrdersAssignment extends AsyncTask<MainMapsActivity, Void, Void> {
             MainMapsActivity mainMapsActivity = mainMapsActivities[0];
             this.courierMain = mainMapsActivity.getCourier();
             Courier courier = (Courier) courierMain.clone();//mb not need
+
             courier.getOrdersAvailable().clear();
+            courier.clearRussianInfo();
 
             String courierInJson = JSONHelper.getJsonFromObject(courier);
 

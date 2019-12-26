@@ -106,6 +106,7 @@
                 android:layout_weight="7"
                 android:ems="10"
                 android:text="Заказ принят"
+                android:visibility="invisible"
                 android:textSize="18sp" />
 
             <TextView
@@ -115,6 +116,7 @@
                 android:layout_weight="10"
                 android:ems="10"
                 android:textSize="18sp"
+                android:visibility="invisible"
                 android:text="21:30"/>
 
             <TextView

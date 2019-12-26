@@ -1,6 +1,7 @@
 package com.example.hello.maps1;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -78,6 +79,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
     private LinearLayout layoutHorizontal;
     private RelativeLayout layoutMap;
+    private AlertDialog assignedOrdersAlertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +114,7 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
         }
 
         //todo add update gui, think mb not need
-        updateGui(courier);
+        //updateGui(courier);
     }
 
     @Override
@@ -534,5 +536,13 @@ public class MainMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
     public void setTimerActive(boolean timerActive) {
         this.timerActive = timerActive;
+    }
+
+    public AlertDialog getAssignedOrdersAlertDialog() {
+        return assignedOrdersAlertDialog;
+    }
+
+    public void setAssignedOrdersAlertDialog(AlertDialog assignedOrdersAlertDialog) {
+        this.assignedOrdersAlertDialog = assignedOrdersAlertDialog;
     }
 }

@@ -8,20 +8,23 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentActivity;
-import androidx.core.app.NotificationCompat;
 
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.services.TrackingService;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.FragmentActivity;
+
 /**
  * Created by Ivan on 02.09.2017.
  */
 
 public class NotificationHelper {
+    protected static final String TAG = NotificationHelper.class.getName();
+
     public static Notification createServiceNotification(Context context) {
         Intent notificationIntent = new Intent(context, MainMapsActivity.class);
         PendingIntent pendingIntent=PendingIntent.getActivity(context,0,notificationIntent,0);
@@ -99,24 +102,24 @@ public class NotificationHelper {
     public static void showNotification(FragmentActivity activity, String title, String messageRoute) {
         Context context = activity.getApplicationContext();
 
-        Intent intent = new Intent(context, MainMapsActivity.class);
+        Intent intent = new Intent(context, NotificationHelper.class);
         //PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_CANCEL_CURRENT);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationManager manager = (NotificationManager) activity.getSystemService(activity.NOTIFICATION_SERVICE);
         Notification myNotication;
 
-        Notification.Builder builder = new Notification.Builder(activity);
-        builder.setAutoCancel(false);
-        builder.setOngoing(true);
-        builder.setTicker(messageRoute);
-        builder.setContentTitle(title);
-        builder.setContentText(messageRoute);
-        builder.setContentIntent(getStandardActivityIntent(context));
-        builder.setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal);
-        builder.setContentIntent(pendingIntent);
-        builder.setNumber(100);
-        builder.setWhen(System.currentTimeMillis());
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setTicker(messageRoute)
+            .setContentTitle(title)
+            .setContentText(messageRoute)
+            .setContentIntent(getStandardActivityIntent(context))
+            .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark_normal)
+            .setContentIntent(pendingIntent)
+            .setNumber(100)
+            .setWhen(System.currentTimeMillis());
         //builder.getNotification();
 
         myNotication = builder.getNotification();

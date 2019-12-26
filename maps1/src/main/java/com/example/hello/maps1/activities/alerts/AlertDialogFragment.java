@@ -1,54 +1,26 @@
 package com.example.hello.maps1.activities.alerts;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.os.Bundle;
-import android.widget.Toast;
 
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
 import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
-import com.example.hello.maps1.helpers.ToolsHelper;
+import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
 
-import org.joda.time.DateTime;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Ivan on 10.12.2017.
  */
 
 public class AlertDialogFragment {
-   /* @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.dialog_fire_missiles)
-                .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // FIRE ZE MISSILES!
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
-        // Create the AlertDialog object and return it
-        return builder.create();
-    }*/
 
     public static AlertDialog showOrdersToAssign(final MainMapsActivity mainMapsActivity) throws CloneNotSupportedException {
         if (mainMapsActivity.getCourier() != null && mainMapsActivity.getCourier().isReadyToAssign() &&
-                mainMapsActivity.getCourier().getOrdersAvailable() != null) {
+                CollectionsHelper.isEmpty(mainMapsActivity.getCourier().getOrdersToAssign()) &&
+                !CollectionsHelper.isEmpty(mainMapsActivity.getCourier().getOrdersAvailable())) {
 
             final Courier courierOrigin = mainMapsActivity.getCourier(); //todo delete if all ok
 
@@ -58,7 +30,6 @@ public class AlertDialogFragment {
 
             final String[] ordersData = new String[ordersAvailable.size()];
             courier.getOrdersData(ordersAvailable).toArray(ordersData);
-            courier.setReadyToAssign(false);
 
             final boolean[] checkedItems = new boolean[ordersAvailable.size()];
             for (boolean item : checkedItems) {
@@ -68,7 +39,7 @@ public class AlertDialogFragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(mainMapsActivity);
             builder.setTitle("Для вашего местоположения доступны следующие заказы:")
                     .setIcon(R.drawable.common_google_signin_btn_icon_dark_normal)
-                    .setCancelable(false)
+                    .setCancelable(true)
                     .setMultiChoiceItems(ordersData, checkedItems,
                             new DialogInterface.OnMultiChoiceClickListener() {
                                 @Override
@@ -86,10 +57,10 @@ public class AlertDialogFragment {
                                     ordersToAssign.add(ordersAvailable.get(i));
                                 }
                             }
+                            ordersAvailable.removeAll(ordersToAssign);
                             courier.assignOrders(ordersToAssign, mainMapsActivity);
                             courier.updateAssignmentState();
-                            //mainMapsActivity.setCourier(courier);
-                            //mainMapsActivity.setTimerActive(true);
+                            mainMapsActivity.setAssignedOrdersAlertDialog(null);
                         }
                     })
                     .setNegativeButton("Отмена",
@@ -97,11 +68,13 @@ public class AlertDialogFragment {
                                 public void onClick(DialogInterface dialog, int id) {
                                     dialog.cancel();
                                     courier.updateAssignmentState();
-                                    //mainMapsActivity.setCourier(courier);
+                                    mainMapsActivity.setAssignedOrdersAlertDialog(null);
                                     mainMapsActivity.setTimerActive(true);
                                 }
                             });
             AlertDialog alert = builder.create();
+            mainMapsActivity.setAssignedOrdersAlertDialog(alert);
+            alert.cancel();
 
             return alert;
         }

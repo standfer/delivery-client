@@ -48,7 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@android:color/holo_red_light"
+            android:background="@android:color/holo_green_light"
             android:checked="false"
             android:onClick="onClickBtnManualMove"
             android:text="Заказ 1"
@@ -100,6 +100,7 @@
             android:editable="false"
             android:enabled="false"
             android:inputType="textPersonName"
+            android:visibility="invisible"
             android:text="1-й заказ до    22:30" />
     </RelativeLayout>
     <RelativeLayout
@@ -113,6 +114,7 @@
             android:layout_height="wrap_content"
             android:enabled="false"
             android:inputType="textPersonName"
+            android:visibility="invisible"
             android:text="последний до 23:20" />
     </RelativeLayout>
 

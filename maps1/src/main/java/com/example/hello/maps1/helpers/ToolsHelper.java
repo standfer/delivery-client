@@ -4,20 +4,21 @@ import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import androidx.core.app.ActivityCompat;
-
+import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.location.Location;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.hello.maps1.MainMapsActivity;
 import com.example.hello.maps1.R;
+import com.example.hello.maps1.asyncEngines.LocationUpdater;
+import com.example.hello.maps1.asyncEngines.handlers.LocationHandlerThread;
 import com.example.hello.maps1.constants.Constants;
 import com.example.hello.maps1.entities.Coordinate;
+import com.example.hello.maps1.entities.Courier;
 import com.example.hello.maps1.entities.Order;
 import com.example.hello.maps1.helpers.data_types.CollectionsHelper;
 import com.google.android.gms.maps.model.LatLng;
@@ -25,6 +26,8 @@ import com.google.android.gms.maps.model.LatLng;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+
+import androidx.core.app.ActivityCompat;
 
 import static com.example.hello.maps1.services.LocationUpdatesService.KEY_REQUESTING_LOCATION_UPDATES;
 
@@ -55,7 +58,7 @@ public class ToolsHelper {
         return String.valueOf(object + ":" + methodName);
     }
 
-    public static void logOrders(Class object, String methodName, List<Order> ... ordersLists) {
+    public static void logOrders(Class object, String methodName, List<Order>... ordersLists) {
         String tag = getLogTagByClass(object, methodName);
         String message = "";
 
@@ -141,6 +144,35 @@ public class ToolsHelper {
         int visibility = isVisible ? View.VISIBLE : View.INVISIBLE;
         for (Button button : buttons) {
             button.setVisibility(visibility);
+        }
+    }
+
+    @Deprecated
+    public static void requestDataFromServer(MainMapsActivity mainMapsActivity) {
+        if (mainMapsActivity == null) return;
+        Courier courier = mainMapsActivity.getCourier();
+        if (courier != null && courier.isReadyToRequest()) {
+            LocationUpdater locationUpdater = new LocationUpdater();
+            try {
+                locationUpdater.execute(mainMapsActivity);
+            } catch (Exception e) {
+                ToolsHelper.logException(e);
+            }
+        }
+    }
+
+    public static void requestDataFromServerByHandler(MainMapsActivity mainMapsActivity) {
+        if (mainMapsActivity == null) return;
+        Courier courier = mainMapsActivity.getCourier();
+        if (courier != null && courier.isReadyToRequest()) {
+            try {
+                LocationHandlerThread locationHandlerThread = new LocationHandlerThread(TAG, mainMapsActivity);
+                locationHandlerThread.start();
+                locationHandlerThread.prepareHandler();
+                locationHandlerThread.postTask();//todo think when exit thread
+            } catch (Exception e) {
+                ToolsHelper.logException(e);
+            }
         }
     }
 }
